@@ -163,6 +163,7 @@ export global SystemPageData {
     in-out property <float> gpu_usage_val: -1.0;
     in-out property <float> ram_usage_val: -1.0;
     in-out property <float> cpu_freq_mhz: -1.0;
+    in-out property <float> gpu_freq_mhz: -1.0;
     in-out property <int> cpu_fan_rpm: -1;
     in-out property <int> gpu_fan_rpm: -1;
     in-out property <int> mid_fan_rpm: -1;
@@ -173,6 +174,9 @@ export global SystemPageData {
     in-out property <float> igpu_temp_val: -1.0;
     in-out property <float> igpu_usage_val: -1.0;
     in-out property <bool> has_igpu: false;
+
+    // Real product name from DMI (read in setup_system.rs).
+    in-out property <string> product_name: "";
 }
 
 export component PageSystem inherits Rectangle {

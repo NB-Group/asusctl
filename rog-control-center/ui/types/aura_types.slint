@@ -74,6 +74,8 @@ export global AuraPageData {
     ];
     in-out property <int> brightness;
     callback cb_brightness(int);
+    // Set the animation speed (0..2, Low/Medium/High) for the current mode.
+    callback cb_speed(int);
     in-out property <[string]> mode_names: [
         @tr("Basic aura mode" => "Static"),
         @tr("Basic aura mode" => "Breathe"),

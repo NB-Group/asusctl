@@ -54,8 +54,29 @@ pub fn setup_slash_page(ui: &MainWindow, _states: Arc<Mutex<Config>>) {
             set_ui_props_async!(handle, slash, SlashPageData, show_battery_warning);
             set_ui_props_async!(handle, slash, SlashPageData, show_on_lid_closed);
 
-            if let Ok(mode) = slash.mode().await {
-                let idx = slash_mode_to_index(mode);
+            // Read the persisted mode, retrying briefly — a single read right
+            // after (re)start can race with asusd and fail, which would leave
+            // the UI stuck on the Static default. The mode-changed listener
+            // below only fires on *changes*, so it won't recover an initial
+            // read failure on its own.
+            let mut mode: Option<SlashMode> = None;
+            for attempt in 0..5u32 {
+                match slash.mode().await {
+                    Ok(m) => {
+                        mode = Some(m);
+                        break;
+                    }
+                    Err(e) => {
+                        log::warn!("slash mode read attempt {} failed: {e}", attempt + 1);
+                        if attempt < 4 {
+                            tokio::time::sleep(std::time::Duration::from_millis(300)).await;
+                        }
+                    }
+                }
+            }
+            if let Some(m) = mode {
+                let idx = slash_mode_to_index(m);
+                log::info!("slash mode at startup: {:?} (index {})", m, idx);
                 let choices = slash_modes();
                 handle
                     .upgrade_in_event_loop(move |handle| {
@@ -64,6 +85,8 @@ pub fn setup_slash_page(ui: &MainWindow, _states: Arc<Mutex<Config>>) {
                         global.set_mode(idx);
                     })
                     .ok();
+            } else {
+                log::error!("slash mode unreadable after retries; UI will show Static");
             }
 
             handle

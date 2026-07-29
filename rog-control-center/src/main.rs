@@ -63,8 +63,16 @@ async fn main() -> Result<()> {
         }
     }
 
-    // Try to open a proxy and check for app state first
-    {
+    // Single-instance guard. Skipped when this binary re-spawned itself for a
+    // "Reload Window" — the child carries ROGCC_NO_SINGLE_INSTANCE so it doesn't
+    // see the still-registered parent and exit; the parent quits right after
+    // spawning, freeing the name for future reloads. The bypass is one-shot:
+    // consume it below so a reload triggered from *this* process can't pass the
+    // skip on to its own child (otherwise the guard stays off forever).
+    let skip_single_instance = std::env::var_os("ROGCC_NO_SINGLE_INSTANCE").is_some();
+    std::env::remove_var("ROGCC_NO_SINGLE_INSTANCE");
+    if !skip_single_instance {
+        // Try to open a proxy and check for app state first
         let user_con = zbus::blocking::Connection::session()?;
         if let Ok(proxy) = ROGCCZbusProxyBlocking::new(&user_con) {
             if let Ok(state) = proxy.state() {
@@ -90,6 +98,24 @@ async fn main() -> Result<()> {
     if asusd_version != self_version {
         println!("Version mismatch: asusctl = {self_version}, asusd = {asusd_version}");
         // return Ok(());
+    }
+
+    // setlocale is process-global and MT-Unsafe (glibc), so it must run before
+    // the Tokio worker threads start at Runtime::new. Read just the language.
+    let startup_language = Config::new().load().language;
+    if !startup_language.is_empty() {
+        let locale = format!("{startup_language}.UTF-8");
+        env::set_var("LANG", &locale);
+        env::set_var("LC_ALL", &locale);
+        env::set_var("LANGUAGE", &startup_language);
+        if let Ok(c) = std::ffi::CString::new(locale) {
+            // SAFETY: setlocale(LC_ALL, valid null-terminated string) only mutates
+            // the C library's global locale — the intent. Run before any worker
+            // thread exists, so nothing else is touching locale state.
+            unsafe {
+                libc::setlocale(libc::LC_ALL, c.as_ptr());
+            }
+        }
     }
 
     // start tokio
@@ -171,6 +197,9 @@ async fn main() -> Result<()> {
     };
     let config = Arc::new(Mutex::new(config));
 
+    // setlocale + LANG/LC_ALL env were applied before Runtime::new (see above);
+    // gettext picks them up at init_translations below.
+
     // GPU power status channel: written by the dGPU status monitor in
     // notify.rs, read by the tray to color its icon
     let (gpu_status_tx, gpu_status_rx) =
@@ -185,11 +214,10 @@ async fn main() -> Result<()> {
     }
 
     if std::env::var("RUST_TRANSLATIONS").is_ok() {
-        // don't care about content
-        log::debug!("---- Using local-dir translations");
+        log::debug!("Using system-installed translations");
         slint::init_translations!("/usr/share/locale/");
     } else {
-        log::debug!("Using system installed translations");
+        log::debug!("Using local translations");
         slint::init_translations!(concat!(env!("CARGO_MANIFEST_DIR"), "/translations/"));
     }
 

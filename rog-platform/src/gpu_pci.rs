@@ -716,6 +716,58 @@ pub fn get_gpu_usage_pct() -> f32 {
     0.0
 }
 
+/// Current dGPU graphics clock in MHz, if a source reads successfully. NVML
+/// first (NVIDIA), then the sysfs nodes NVIDIA (`gpu_current_freq`) and amdgpu
+/// (`freq1_input`) expose. `None` when no source is available.
+pub fn get_gpu_frequency_mhz() -> Option<f32> {
+    if let Ok(nvml) = nvml_wrapper::Nvml::init() {
+        if let Ok(device) = nvml.device_by_index(0) {
+            if let Ok(clock) =
+                device.clock_info(nvml_wrapper::enum_wrappers::device::Clock::Graphics)
+            {
+                return Some(clock as f32);
+            }
+        }
+    }
+    if let Ok(entries) = std::fs::read_dir("/sys/class/drm") {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            let is_card = path
+                .file_name()
+                .map(|n| n.to_string_lossy().starts_with("card"))
+                .unwrap_or(false);
+            if is_card {
+                let nv = path.join("device/gpu_current_freq");
+                if nv.exists() {
+                    if let Ok(s) = std::fs::read_to_string(&nv) {
+                        if let Ok(v) = s.trim().parse::<f32>() {
+                            return Some(v);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    if let Ok(entries) = std::fs::read_dir("/sys/class/hwmon") {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if let Ok(name) = std::fs::read_to_string(path.join("name")) {
+                if name.trim() == "amdgpu" {
+                    if let Ok(s) = std::fs::read_to_string(path.join("freq1_input")) {
+                        if let Ok(v) = s.trim().parse::<f32>() {
+                            // amdgpu hwmon freq1_input follows the standard hwmon
+                            // convention (Hz) — convert to MHz. (NVIDIA's
+                            // gpu_current_freq and NVML are already MHz.)
+                            return Some(v / 1_000_000.0);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use std::fs;

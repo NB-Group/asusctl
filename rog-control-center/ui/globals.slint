@@ -1,8 +1,98 @@
+// rog-control-center — Armoury Crate-style design tokens (rebuilt from scratch).
+// Colour values are reverse-engineered from AC 6.5.7 (SVG stats + dll hex), not eyeballed.
+
 export global AppSize {
-    out property <length> width: 900px;
-    out property <length> height: 500px;
+    out property <length> width: 1000px;
+    out property <length> height: 640px;
 }
 
-export global IconImages {
-    //out property <image> two_t: @image-url("images/parameters/2t.png");
+export global Theme {
+    // — Brand pair (AC red + blue) —
+    out property <color> rog-red:   #FF1929;   // brand / selected / CTA
+    out property <color> rog-blue:  #148AC4;   // secondary brand / hover / progress
+
+    // — Icon / interaction states (AC _n/_h/_p/_d) —
+    out property <color> fg-normal:   #F2F2F2;
+    out property <color> fg-hover:    #148AC4;
+    out property <color> fg-pressed:  #FF1929;
+    out property <color> fg-disabled: #4D4D4D;
+
+    // — Text hierarchy —
+    out property <color> text-primary:   #F2F2F2;
+    out property <color> text-secondary: #B3B3B3;
+    out property <color> text-dim:       #6A6A6A;
+
+    // — Background layers (AC dark base, lighter cards: window near-black, cards a touch lighter) —
+    out property <color> bg-base:     #0A0A0A;   // window base (near-black)
+    out property <color> bg-panel:    #070707;   // sidebar / panels (darkest)
+    out property <color> bg-card:     #161616;   // cards (lighter than base)
+    out property <color> bg-elevated: #242424;   // raised / inputs / hover
+    out property <color> bg-preview: #100d0f;    // light-bar preview panel (slash page warm-black)
+
+    // — Status colours —
+    out property <color> state-good:   #4CAF50;  // green: ok
+    out property <color> state-warn:   #FF9E1B;  // orange: warning
+    out property <color> state-danger: #FF1929;  // red: danger
+    out property <color> state-accent: #E6A81D;  // gold: accent
+
+    // — Dark variants (glow / shadow) —
+    out property <color> red-deep:     #4D080C;
+    out property <color> blue-deep:    #08364C;
+    out property <color> rog-red-glow:  #55FF1929;
+    out property <color> rog-blue-glow: #55148AC4;
+
+    // — Dividers (very subtle) —
+    out property <color> divider: #2A2A2A;
+    out property <color> line:        #575757;   // progress track / strong divider (AC HTML)
+    out property <color> line-soft:   #343434;
+
+    // — Meter gradient (AC meter purple → red) —
+    out property <color> meter-start: #6437FF;   // progress bar purple end
+    out property <color> meter-end:   #FF1929;   // progress bar red end (= rog-red)
+
+    // — Chrome (from AC HTML) —
+    out property <color> titlebar-bg: #181818;
+    out property <color> sidebar-bg:  #161616;
+    out property <color> sidebar-selected: #5A2025;  // selected nav item dark-red fill
+
+    // — Operation-mode selected state —
+    out property <color> mode-selected:        #2A1114;
+    out property <color> mode-selected-strong: #4D1117;
+
+    // — Legacy compat for common.slint (kept for the transition, not for the new look) —
+    out property <color> border:        #2A2A2A;
+    out property <color> border-accent: #FF1929;
+    out property <color> bg-app:        #1A1A1A;
+    out property <color> bg-card-hover: #2E2E2E;
+    out property <color> accent:        #FF1929;
+    out property <color> accent-soft:   #FF5566;
+    out property <color> accent-glow:   #55FF1929;
+    out property <color> success:       #4CAF50;
+    out property <color> warn:          #FF9E1B;
+    out property <color> danger:        #FF1929;
+
+    // — Corner radii —
+    out property <length> radius-card: 8px;
+    out property <length> radius-item: 4px;
+    out property <length> radius-pill:  14px;
+
+    // — Spacing —
+    out property <length> space-xs: 4px;
+    out property <length> space-sm: 8px;
+    out property <length> space:    12px;
+    out property <length> space-lg: 20px;
+    out property <length> pad-card: 16px;
+
+    // — Font sizes —
+    out property <length> font-xs:  11px;
+    out property <length> font-sm:  13px;
+    out property <length> font-md:  15px;
+    out property <length> font-lg:  20px;
+    out property <length> font-xl:  28px;
+    out property <length> font-2xl: 38px;   // dashboard big number
+
+    // Temperature threshold colour (>80 red / >65 orange / else green) — pure, usable in bindings
+    public pure function temp-color(temp: float) -> color {
+        return temp > 80.0 ? #FF1929 : (temp > 65.0 ? #FF9E1B : #4CAF50);
+    }
 }

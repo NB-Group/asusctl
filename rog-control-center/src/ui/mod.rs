@@ -141,6 +141,7 @@ pub fn setup_window(
     let ui = MainWindow::new().expect("Couldn't create main window");
     // propagate TUF flag to the UI so the sidebar can swap logo branding
     ui.set_is_tuf(is_tuf);
+    ui.set_app_version(env!("CARGO_PKG_VERSION").into());
     if let Err(e) = ui.window().show() {
         warn!("Couldn't show main window: {e:?}");
     }
@@ -200,6 +201,62 @@ fn ui_shortcut_status(status: ShortcutStatus) -> GlobalShortcutStatus {
         ShortcutStatus::Listening => GlobalShortcutStatus::Listening,
         ShortcutStatus::Unavailable => GlobalShortcutStatus::Unavailable,
     }
+}
+
+/// Locale codes that have a translation on disk: the source `translations/`
+/// tree (every subdir is ours) plus any installed under `/usr/share/locale`
+/// that actually ships our catalog. Sorted + deduped, with an "en" fallback so
+/// the picker is never empty. The locale *list* is automatic; the native
+/// display names live in `language_display_name` (add a line there when a new
+/// translation lands — until then it shows the raw code).
+fn available_languages() -> Vec<SharedString> {
+    let mut set: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
+    // English is the source language (no .mo needed) — always present, so a
+    // fresh config never lands on a translation by default.
+    set.insert("en".to_owned());
+    let dev = concat!(env!("CARGO_MANIFEST_DIR"), "/translations");
+    for dir in [dev, "/usr/share/locale"] {
+        if let Ok(entries) = std::fs::read_dir(dir) {
+            for entry in entries.flatten() {
+                let path = entry.path();
+                if !path.is_dir() {
+                    continue;
+                }
+                // /usr/share/locale holds every app's locales, so only count
+                // dirs carrying our catalog; the source tree is all ours.
+                let ours = dir == dev || path.join("LC_MESSAGES/rog-control-center.mo").exists();
+                if ours {
+                    if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
+                        set.insert(name.to_string());
+                    }
+                }
+            }
+        }
+    }
+    let mut v: Vec<SharedString> = set.into_iter().map(SharedString::from).collect();
+    if v.is_empty() {
+        v.push(SharedString::from("en"));
+    }
+    v
+}
+
+/// Native display name for a locale code — language pickers conventionally
+/// show each language in its own tongue. Unknown codes fall back to themselves
+/// so a newly added translation still shows up (as its code) until named here.
+fn language_display_name(code: &str) -> SharedString {
+    let name = match code {
+        "en" => "English",
+        "zh_CN" => "简体中文",
+        "fr" => "Français",
+        "it" => "Italiano",
+        "ru" => "Русский",
+        "tr" => "Türkçe",
+        "uk_UA" => "Українська",
+        "pt_BR" => "Português (Brasil)",
+        "az" => "Azərbaycanca",
+        other => other,
+    };
+    SharedString::from(name)
 }
 
 pub fn setup_app_settings_page(
@@ -365,4 +422,64 @@ pub fn setup_app_settings_page(
             });
         });
     }
+
+    // Discover shipped translations at startup so the picker lists every
+    // language without a hardcoded array.
+    let codes = available_languages();
+    let configured_language = config
+        .try_lock()
+        .map(|lock| lock.language.clone())
+        .unwrap_or_default();
+    // Match the persisted language; fall back to "en" (source language), then
+    // index 0 — so a stale config like the old "en_US" still lands on English.
+    let current_idx = codes
+        .iter()
+        .position(|l| l.as_str() == configured_language.as_str())
+        .or_else(|| codes.iter().position(|l| l.as_str() == "en"))
+        .unwrap_or(0) as i32;
+    // The picker shows each language in its own name (standard for language
+    // selectors); the raw code is what gets persisted, so keep both in lockstep.
+    let display: Vec<SharedString> = codes
+        .iter()
+        .map(|c| language_display_name(c.as_str()))
+        .collect();
+    global.set_available_languages(slint::ModelRc::new(slint::VecModel::from(display)));
+    global.set_current_language(current_idx);
+
+    let config_copy = config.clone();
+    global.on_cb_change_language(move |index: i32| {
+        if let Some(code) = codes.get(index as usize) {
+            if let Ok(mut lock) = config_copy.try_lock() {
+                lock.language = code.to_string();
+                lock.write();
+            }
+            log::info!("Language changed to {code}; reload to apply");
+        }
+    });
+
+    // Reload Window: spawn a fresh instance flagged to skip the single-instance
+    // guard (ROGCC_NO_SINGLE_INSTANCE), then quit this one. spawn+quit is
+    // reliable where exec() was not: the old DBus name is released on quit and
+    // the new image never races the check. The child re-reads config.language
+    // and re-resolves @tr() in the chosen locale.
+    global.on_cb_reload_window(move || {
+        let exe = match std::env::current_exe() {
+            Ok(e) => e,
+            Err(e) => {
+                log::error!("reload: cannot resolve current exe: {e}");
+                return;
+            }
+        };
+        log::info!("reload: spawning {:?}", exe);
+        match std::process::Command::new(exe)
+            .env("ROGCC_NO_SINGLE_INSTANCE", "1")
+            .spawn()
+        {
+            Ok(_) => {
+                slint::quit_event_loop()
+                    .unwrap_or_else(|e| log::error!("reload: quit_event_loop: {e}"));
+            }
+            Err(e) => log::error!("reload: spawn failed: {e}"),
+        }
+    });
 }

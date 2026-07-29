@@ -1,9 +1,11 @@
 import { Palette, VerticalBox , StandardButton, Button, HorizontalBox, ComboBox, Switch, Slider} from "std-widgets.slint";
+import { Theme } from "../globals.slint";
 
 export component RogItem inherits Rectangle {
-    border-color: Palette.border;
+    border-color: Theme.border;
     border-width: 1px;
-    border-radius: 2px;
+    border-radius: Theme.radius-item;
+    background: Theme.bg-card;
     min-height: 44px;
     max-height: 44px;
 }
@@ -325,7 +327,7 @@ export component PopupNotification {
                     }
 
                     Button {
-                        text: "More Info";
+                        text: @tr("More Info");
                         dialog-button-role: action;
                     }
                 }
