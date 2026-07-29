@@ -100,22 +100,16 @@ async fn main() -> Result<()> {
         // return Ok(());
     }
 
-    // setlocale is process-global and MT-Unsafe (glibc), so it must run before
-    // the Tokio worker threads start at Runtime::new. Read just the language.
+    // Apply the configured UI language through env vars before Runtime::new
+    // (they're process-global). "Reload Window" restarts the process, which
+    // re-reads config.language here so gettext resolves @tr() in the chosen
+    // locale at init_translations — no setlocale / unsafe / libc needed.
     let startup_language = Config::new().load().language;
     if !startup_language.is_empty() {
         let locale = format!("{startup_language}.UTF-8");
         env::set_var("LANG", &locale);
         env::set_var("LC_ALL", &locale);
         env::set_var("LANGUAGE", &startup_language);
-        if let Ok(c) = std::ffi::CString::new(locale) {
-            // SAFETY: setlocale(LC_ALL, valid null-terminated string) only mutates
-            // the C library's global locale — the intent. Run before any worker
-            // thread exists, so nothing else is touching locale state.
-            unsafe {
-                libc::setlocale(libc::LC_ALL, c.as_ptr());
-            }
-        }
     }
 
     // start tokio
