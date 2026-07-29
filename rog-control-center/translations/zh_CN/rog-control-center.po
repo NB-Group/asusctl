@@ -303,7 +303,7 @@ msgstr "SPPT,APU 慢速功率限制"
 #: rog-control-center/ui/pages/system.slint:228
 msgctxt "ppt_platform_sppt"
 msgid "Slow package power tracking limit"
-msgstr ""
+msgstr "慢速封装功率追踪限制"
 
 #: rog-control-center/ui/pages/system.slint:238
 #, fuzzy
