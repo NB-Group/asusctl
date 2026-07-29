@@ -236,7 +236,13 @@ export component PageGPU inherits RogPage {
                         toggled(v) => { GPUPageData.cb_set_xgm_led_enabled(v); }
                     }
 
-                    if GPUPageData.apu_mem_present: VerticalLayout {
+                    // Guard the index: apu_mem_index defaults to -1 and the model
+                    // is filled asynchronously, so only build the row once both
+                    // are valid — otherwise choices[index] indexes out of range.
+                    if GPUPageData.apu_mem_present
+                        && GPUPageData.apu_mem_choices.length > 0
+                        && GPUPageData.apu_mem_index >= 0
+                        && GPUPageData.apu_mem_index < GPUPageData.apu_mem_choices.length: VerticalLayout {
                         spacing: 10px;
                         RogDropdownRow {
                             label: @tr("Reserved GPU Memory (iGPU VRAM)");
