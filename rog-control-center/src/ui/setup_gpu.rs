@@ -183,7 +183,11 @@ fn set_apu_mem(proxy: AsusArmouryProxy<'static>, handle: Weak<MainWindow>, value
         let new_current = p.current_value().await.unwrap_or(value);
         let choices = p.possible_values().await.unwrap_or_default();
         let new_index = choices.iter().position(|v| *v == new_current).unwrap_or(0) as i32;
+        // Refresh the labels too: the firmware's option set can change after a
+        // write, so a stale model would leave the dropdown out of sync.
+        let labels: Vec<SharedString> = choices.iter().map(|v| apu_mem_val_to_label(*v)).collect();
         w.upgrade_in_event_loop(move |h| {
+            h.global::<GPUPageData>().set_apu_mem_choices(labels.as_slice().into());
             h.global::<GPUPageData>().set_apu_mem_index(new_index);
         })
         .unwrap_or_else(|e| error!("setup_gpu: failed to refresh apu_mem index: {e:?}"));
