@@ -132,6 +132,7 @@ export component PageFans inherits RogPage {
             // Profile tab — selects which profile's curve to edit.
             RogTabBar {
                 tabs: [@tr("Balanced"), @tr("Performance"), @tr("Quiet")];
+                tab-enabled: [FanPageData.balanced_available, FanPageData.performance_available, FanPageData.quiet_available];
                 active <=> root.current-profile;
             }
 

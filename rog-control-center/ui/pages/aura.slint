@@ -51,6 +51,7 @@ export component PageAura inherits RogPage {
     content := Rectangle {
         y: titlebar.height;
         width: 100%;
+        height: root.height - titlebar.height;
 
         VerticalLayout {
             padding-left: 24px;
@@ -87,6 +88,7 @@ export component PageAura inherits RogPage {
                         vertical-alignment: center;
                     }
                     TouchArea {
+                        mouse-cursor: pointer;
                         clicked => {
                             root.show_fade_cover = true;
                             root.show_aura_power = true;
@@ -359,7 +361,7 @@ export component PageAura inherits RogPage {
                                             if e.kind == PointerEventKind.down || (e.kind == PointerEventKind.move && self.pressed) {
                                                 AuraPageData.speed = Math.round(clamp(self.mouse-x / self.width, 0.0, 1.0) * 2);
                                             }
-                                            if e.kind == PointerEventKind.up {
+                                            if e.kind == PointerEventKind.up || e.kind == PointerEventKind.cancel {
                                                 AuraPageData.cb_speed(AuraPageData.speed);
                                             }
                                         }
@@ -428,7 +430,7 @@ export component PageAura inherits RogPage {
                                             if e.kind == PointerEventKind.down || (e.kind == PointerEventKind.move && self.pressed) {
                                                 AuraPageData.brightness = Math.round(clamp(self.mouse-x / self.width, 0.0, 1.0) * 3);
                                             }
-                                            if e.kind == PointerEventKind.up {
+                                            if e.kind == PointerEventKind.up || e.kind == PointerEventKind.cancel {
                                                 AuraPageData.cb_brightness(AuraPageData.brightness);
                                             }
                                         }
@@ -456,7 +458,7 @@ export component PageAura inherits RogPage {
         }
     }
 
-    if root.show_aura_power && AuraPageData.device_type == AuraDevType.New: Rectangle {
+    if root.show_aura_power && (AuraPageData.device_type == AuraDevType.New || AuraPageData.device_type == AuraDevType.Tuf): Rectangle {
         background: Theme.bg-base;
         border-radius: Theme.radius-card;
         drop-shadow-blur: 24px;
@@ -466,6 +468,10 @@ export component PageAura inherits RogPage {
         width: root.width * 0.84;
         height: root.height * 0.88;
         clip: true;
+
+        // Swallow clicks on the modal's blank regions so they don't fall
+        // through to the fade-cover underneath and dismiss the dialog.
+        TouchArea { width: 100%; height: 100%; }
 
         VerticalLayout {
             padding: 20px;
@@ -492,6 +498,7 @@ export component PageAura inherits RogPage {
                         vertical-alignment: center;
                     }
                     TouchArea {
+                        mouse-cursor: pointer;
                         clicked => {
                             root.show_aura_power = false;
                             root.show_fade_cover = false;
@@ -526,76 +533,6 @@ export component PageAura inherits RogPage {
         }
     }
 
-    if root.show_aura_power && AuraPageData.device_type == AuraDevType.Tuf: Rectangle {
-        background: Theme.bg-base;
-        border-radius: Theme.radius-card;
-        drop-shadow-blur: 24px;
-        drop-shadow-color: #80000000;
-        x: root.width * 0.08;
-        y: root.height * 0.06;
-        width: root.width * 0.84;
-        height: root.height * 0.88;
-        clip: true;
-
-        VerticalLayout {
-            padding: 20px;
-            spacing: 16px;
-            HorizontalLayout {
-                Text {
-                    text: @tr("Power Settings");
-                    color: Theme.text-primary;
-                    font-size: 17px;
-                    font-weight: 700;
-                    vertical-alignment: center;
-                }
-                Rectangle { horizontal-stretch: 1; }
-                Rectangle {
-                    width: 28px;
-                    height: 28px;
-                    border-radius: 14px;
-                    background: Theme.bg-elevated;
-                    Text {
-                        text: "✕";
-                        color: Theme.text-secondary;
-                        font-size: 13px;
-                        horizontal-alignment: center;
-                        vertical-alignment: center;
-                    }
-                    TouchArea {
-                        clicked => {
-                            root.show_aura_power = false;
-                            root.show_fade_cover = false;
-                        }
-                    }
-                }
-            }
-
-            for state[idx] in AuraPageData.led_power.states: tuf_zone := AuraPowerGroup {
-                group-title: AuraPageData.power_zone_names[state.zone_name_idx];
-                boot_checked: state.boot;
-                boot_toggled => {
-                    AuraPageData.led_power.states[idx].boot = tuf_zone.boot_checked;
-                    AuraPageData.cb_led_power(AuraPageData.led_power);
-                }
-                awake_checked: state.awake;
-                awake_toggled => {
-                    AuraPageData.led_power.states[idx].awake = tuf_zone.awake_checked;
-                    AuraPageData.cb_led_power(AuraPageData.led_power);
-                }
-                sleep_checked: state.sleep;
-                sleep_toggled => {
-                    AuraPageData.led_power.states[idx].sleep = tuf_zone.sleep_checked;
-                    AuraPageData.cb_led_power(AuraPageData.led_power);
-                }
-                shutdown_checked: state.shutdown;
-                shutdown_toggled => {
-                    AuraPageData.led_power.states[idx].shutdown = tuf_zone.shutdown_checked;
-                    AuraPageData.cb_led_power(AuraPageData.led_power);
-                }
-            }
-        }
-    }
-
     if root.show_aura_power && AuraPageData.device_type == AuraDevType.Old: Rectangle {
         background: Theme.bg-base;
         border-radius: Theme.radius-card;
@@ -607,6 +544,10 @@ export component PageAura inherits RogPage {
         height: root.height * 0.88;
         clip: true;
 
+        // Swallow clicks on the modal's blank regions so they don't fall
+        // through to the fade-cover underneath and dismiss the dialog.
+        TouchArea { width: 100%; height: 100%; }
+
         VerticalLayout {
             padding: 20px;
             spacing: 16px;
@@ -632,6 +573,7 @@ export component PageAura inherits RogPage {
                         vertical-alignment: center;
                     }
                     TouchArea {
+                        mouse-cursor: pointer;
                         clicked => {
                             root.show_aura_power = false;
                             root.show_fade_cover = false;

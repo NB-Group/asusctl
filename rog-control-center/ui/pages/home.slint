@@ -192,7 +192,7 @@ export component PageHome inherits RogPage {
                         vertical-stretch: 0;
                         spacing: 12px;
 
-                        Rectangle {
+                        if SystemPageData.platform_profile_indexes.length > 0: Rectangle {
                             height: 24px;
                             HorizontalLayout {
                                 spacing: 8px;
@@ -208,7 +208,7 @@ export component PageHome inherits RogPage {
                             }
                         }
 
-                        Rectangle {
+                        if SystemPageData.platform_profile_indexes.length > 0: Rectangle {
                             height: 104px;
                             width: 100%;
                             clip: true;

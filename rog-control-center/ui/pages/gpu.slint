@@ -2,7 +2,7 @@
 // Layout: titlebar + backend-provided display mode cards + process list
 // Pattern: alignment:start, HorizontalLayout, no ScrollView, natural height
 // Data: all from GPUPageData global (D-Bus backed)
-import { RogCard, RogSlashMark, RogToggle, RogDisplayModeCard, RogPage } from "../widgets/rog.slint";
+import { RogCard, RogDropdownRow, RogSlashMark, RogToggle, RogDisplayModeCard, RogPage } from "../widgets/rog.slint";
 import { Theme } from "../globals.slint";
 
 export global GPUPageData {
@@ -238,18 +238,13 @@ export component PageGPU inherits RogPage {
 
                     if GPUPageData.apu_mem_present: VerticalLayout {
                         spacing: 10px;
-                        HorizontalLayout {
-                            Text { text: @tr("Reserved GPU Memory (iGPU VRAM)"); color: Theme.text-secondary; font-size: 13px; vertical-alignment: center; }
-                            Rectangle { horizontal-stretch: 1; }
-                            Rectangle {
-                                width: 140px; height: 30px; border-radius: 3px;
-                                border-width: 1px; border-color: Theme.line; background: Theme.bg-elevated;
-                                Text {
-                                    text: GPUPageData.apu_mem_choices[GPUPageData.apu_mem_index];
-                                    color: Theme.text-secondary; font-size: 12px;
-                                    horizontal-alignment: center; vertical-alignment: center;
-                                }
-                            }
+                        RogDropdownRow {
+                            label: @tr("Reserved GPU Memory (iGPU VRAM)");
+                            combo-min-width: 140px;
+                            current-index <=> GPUPageData.apu_mem_index;
+                            current-value: GPUPageData.apu_mem_choices[GPUPageData.apu_mem_index];
+                            model: GPUPageData.apu_mem_choices;
+                            selected(i) => { GPUPageData.cb_set_apu_mem(i); }
                         }
                         Text { text: @tr("Note: Reserved GPU memory changes take effect after a reboot."); color: Theme.text-dim; font-size: 11px; }
                     }

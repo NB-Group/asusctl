@@ -452,8 +452,10 @@ pub fn setup_app_settings_page(
             if let Ok(mut lock) = config_copy.try_lock() {
                 lock.language = code.to_string();
                 lock.write();
+                log::info!("Language changed to {code}; reload to apply");
+            } else {
+                log::warn!("config lock busy; language change to {code} not saved");
             }
-            log::info!("Language changed to {code}; reload to apply");
         }
     });
 

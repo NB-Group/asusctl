@@ -265,7 +265,7 @@ export component RogToggle inherits Rectangle {
             width: 44px;
             height: 24px;
             border-radius: 12px;
-            background: root.checked ? (root.enabled ? Theme.rog-red : Theme.fg-disabled) : #3A3A3A;
+            background: root.checked ? (root.enabled ? Theme.rog-red : Theme.fg-disabled) : Theme.toggle-off;
             ta := TouchArea {
                 enabled: root.enabled;
                 clicked => {
@@ -307,7 +307,7 @@ export component RogToggleInt inherits Rectangle {
             width: 44px;
             height: 24px;
             border-radius: 12px;
-            background: root.checked-int != 0 ? (root.enabled ? Theme.rog-red : Theme.fg-disabled) : #3A3A3A;
+            background: root.checked-int != 0 ? (root.enabled ? Theme.rog-red : Theme.fg-disabled) : Theme.toggle-off;
             ta := TouchArea {
                 enabled: root.enabled;
                 clicked => {
@@ -572,6 +572,7 @@ export component RogProductCard inherits Rectangle {
 // —— Tab bar: horizontal row of tabs with red underline on active ——
 export component RogTabBar inherits Rectangle {
     in property <[string]> tabs;
+    in property <[bool]> tab-enabled: [];
     in-out property <int> active: 0;
     callback tab-changed(int);
     height: 44px;
@@ -600,7 +601,9 @@ export component RogTabBar inherits Rectangle {
                 alignment: center;
                 Text {
                     text: t;
-                    color: i == root.active ? Theme.text-primary : Theme.text-secondary;
+                    color: (i >= root.tab-enabled.length || root.tab-enabled[i])
+                        ? (i == root.active ? Theme.text-primary : Theme.text-secondary)
+                        : Theme.fg-disabled;
                     font-size: 14px;
                     font-weight: i == root.active ? 600 : 400;
                     horizontal-alignment: center;
@@ -608,6 +611,7 @@ export component RogTabBar inherits Rectangle {
             }
 
             ta := TouchArea {
+                enabled: i >= root.tab-enabled.length || root.tab-enabled[i];
                 clicked => {
                     root.active = i;
                     root.tab-changed(i);
@@ -700,7 +704,7 @@ export component RogEffectButton inherits VerticalLayout {
         width: 72px;
         height: 72px;
         border-radius: 36px;
-        background: root.selected ? #2A1114 : #1A1A1A;
+        background: root.selected ? Theme.mode-selected : Theme.bg-app;
         border-width: root.selected ? 2px : 1px;
         border-color: root.selected ? Theme.rog-red : Theme.line-soft;
 

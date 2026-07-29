@@ -283,22 +283,22 @@ msgstr "省电"
 #: rog-control-center/ui/pages/system.slint:188
 msgctxt "ppt_pl1_spl"
 msgid "PL1, sustained power limit"
-msgstr ""
+msgstr "PL1,持续功率限制"
 
 #: rog-control-center/ui/pages/system.slint:198
 msgctxt "ppt_pl2_sppt"
 msgid "PL2, turbo power limit"
-msgstr ""
+msgstr "PL2,峰值功率限制"
 
 #: rog-control-center/ui/pages/system.slint:208
 msgctxt "ppt_fppt"
 msgid "FPPT, Fast Power Limit"
-msgstr ""
+msgstr "FPPT,快速功率限制"
 
 #: rog-control-center/ui/pages/system.slint:218
 msgctxt "ppt_apu_sppt"
 msgid "SPPT, APU slow power limit"
-msgstr ""
+msgstr "SPPT,APU 慢速功率限制"
 
 #: rog-control-center/ui/pages/system.slint:228
 msgctxt "ppt_platform_sppt"
@@ -804,7 +804,7 @@ msgstr "静音"
 #: rog-control-center/ui/pages/home.slint
 msgctxt "PageHome"
 msgid "Turbo"
-msgstr " turbo"
+msgstr "涡轮"
 
 #: rog-control-center/ui/pages/home.slint
 msgctxt "PageHome"
