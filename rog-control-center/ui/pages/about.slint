@@ -102,13 +102,13 @@ export component PageAbout inherits RogPage {
                                 horizontal-alignment: left;
                                 width: 100%;
                             }
-                            Text {
-                                text: @tr("Performance: Switch power profiles and customize fan curves.\nAura Sync: Control keyboard backlighting and LED effects.\nBattery Health: Set charge limits to extend battery longevity.\nDisplay: Toggle Panel Overdrive and refresh rates.\nAniMe Matrix: Control AniMe Matrix displays.");
-                                color: Theme.text-secondary;
-                                font-size: 12px;
-                                horizontal-alignment: left;
-                                width: 100%;
-                                wrap: word-wrap;
+                            VerticalLayout {
+                                spacing: 4px;
+                                Text { text: @tr("Performance: Switch power profiles and customize fan curves."); color: Theme.text-secondary; font-size: 12px; width: 100%; wrap: word-wrap; }
+                                Text { text: @tr("Aura Sync: Control keyboard backlighting and LED effects."); color: Theme.text-secondary; font-size: 12px; width: 100%; wrap: word-wrap; }
+                                Text { text: @tr("Battery Health: Set charge limits to extend battery longevity."); color: Theme.text-secondary; font-size: 12px; width: 100%; wrap: word-wrap; }
+                                Text { text: @tr("Display: Toggle Panel Overdrive and refresh rates."); color: Theme.text-secondary; font-size: 12px; width: 100%; wrap: word-wrap; }
+                                Text { text: @tr("AniMe Matrix: Control AniMe Matrix displays."); color: Theme.text-secondary; font-size: 12px; width: 100%; wrap: word-wrap; }
                             }
 
                             // Requirements
@@ -158,7 +158,7 @@ export component PageAbout inherits RogPage {
                             }
                             Text {
                                 text: "github.com/OpenGamingCollective/asusctl\nasus-linux.org";
-                                color: Theme.rog-blue;
+                                color: Theme.text-secondary;
                                 font-size: 12px;
                                 horizontal-alignment: left;
                                 width: 100%;
