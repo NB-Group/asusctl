@@ -791,10 +791,6 @@ msgctxt "PageHome"
 msgid "Edit Manual Mode"
 msgstr "编辑手动模式"
 
-#: rog-control-center/ui/pages/home.slint
-msgctxt "PageHome"
-msgid "Windows"
-msgstr "Windows"
 
 #: rog-control-center/ui/pages/home.slint
 msgctxt "PageHome"
@@ -1017,11 +1013,8 @@ msgstr "混合输出"
 
 #: rog-control-center/ui/pages/gpu.slint
 msgctxt "PageGPU"
-msgid ""
-"[Windows default] Also called MHybrid. Auto-switches between dGPU and iGPU "
-"based on workload."
-msgstr ""
-"[Windows 默认] 也称 MHybrid，根据负载在独立显卡和集成显卡之间自动切换。"
+msgid "Auto-switches between the discrete and integrated GPUs based on workload."
+msgstr "根据负载在独立显卡和集成显卡之间自动切换。"
 
 #: rog-control-center/ui/pages/gpu.slint
 msgctxt "PageGPU"

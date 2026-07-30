@@ -43,7 +43,7 @@ export component PageGPU inherits RogPage {
         return mode == "Ultimate"
             ? @tr("Uses only the discrete GPU for all rendering. Best performance but higher power consumption.")
             : mode == "Hybrid"
-                ? @tr("[Windows default] Also called MHybrid. Auto-switches between dGPU and iGPU based on workload.")
+                ? @tr("Auto-switches between the discrete and integrated GPUs based on workload.")
                 : mode == "Integrated"
                     ? @tr("Completely disables discrete GPU for best power saving. Lower temps and noise but significantly reduced performance.")
                     : "";
