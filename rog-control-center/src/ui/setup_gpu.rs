@@ -274,20 +274,28 @@ pub fn setup_gpu_page(ui: &MainWindow) {
                 global.set_apu_mem_present(true);
                 global.set_apu_mem_choices(apu_choices.as_slice().into());
                 global.set_apu_mem_index(apu_index);
-                let weak_handle = h.as_weak();
                 global.on_cb_set_apu_mem(move |index| {
-                    let Some(value) = possible.get(index as usize).copied() else {
-                        return;
-                    };
-                    // Disable the dropdown while applying
-                    weak_handle
-                        .upgrade_in_event_loop(move |h| {
-                            h.global::<GPUPageData>().set_apu_mem_index(index);
-                        })
-                        .unwrap_or_else(|e| {
-                            error!("setup_gpu: failed to set apu_mem index: {e:?}")
-                        });
-                    set_apu_mem(proxy_cb.clone(), handle_cb.clone(), value);
+                    let proxy_cb = proxy_cb.clone();
+                    let handle_cb = handle_cb.clone();
+                    // Re-read the firmware option set so the UI index maps to the
+                    // right value even if the list/order changed since startup —
+                    // closing over the initial possible vector would write a
+                    // stale or wrong value otherwise.
+                    tokio::spawn(async move {
+                        let possible: Vec<i32> =
+                            proxy_cb.possible_values().await.unwrap_or_default();
+                        let Some(value) = possible.get(index as usize).copied() else {
+                            return;
+                        };
+                        handle_cb
+                            .upgrade_in_event_loop(move |h| {
+                                h.global::<GPUPageData>().set_apu_mem_index(index);
+                            })
+                            .unwrap_or_else(|e| {
+                                error!("setup_gpu: failed to set apu_mem index: {e:?}")
+                            });
+                        set_apu_mem(proxy_cb.clone(), handle_cb.clone(), value);
+                    });
                 });
             }) {
                 error!("setup_gpu: failed to wire apu_mem callback: {e:?}");
