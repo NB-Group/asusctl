@@ -27,7 +27,11 @@ use tokio::runtime::Runtime;
 async fn main() -> Result<()> {
     // Ensure tracing spans are quiet by default unless user overrides
     if std::env::var_os("RUST_LOG").is_none() {
-        std::env::set_var("RUST_LOG", "warn,tracing=error,zbus=error");
+        // SAFETY: This runs before any threads are spawned (before Runtime::new),
+        // so no concurrent getenv can race with this setenv.
+        unsafe {
+            std::env::set_var("RUST_LOG", "warn,tracing=error,zbus=error");
+        }
     }
     let mut logger = env_logger::Builder::new();
     logger
@@ -51,26 +55,31 @@ async fn main() -> Result<()> {
         debug!("Gamescope detected");
         if !gamescope.is_empty() {
             debug!("Setting WAYLAND_DISPLAY to {}", gamescope);
-            env::set_var("WAYLAND_DISPLAY", gamescope);
+            // SAFETY: This runs before any threads are spawned (before Runtime::new),
+            // so no concurrent getenv can race with this setenv.
+            unsafe {
+                env::set_var("WAYLAND_DISPLAY", gamescope);
+            }
         }
         // gamescope-0
         else if let Ok(wayland) = env::var("WAYLAND_DISPLAY") {
             debug!("Wayland display detected");
             if wayland.is_empty() {
                 debug!("Setting WAYLAND_DISPLAY to gamescope-0");
-                env::set_var("WAYLAND_DISPLAY", "gamescope-0");
+                // SAFETY: This runs before any threads are spawned (before Runtime::new),
+                // so no concurrent getenv can race with this setenv.
+                unsafe {
+                    env::set_var("WAYLAND_DISPLAY", "gamescope-0");
+                }
             }
         }
     }
 
     // Single-instance guard. Skipped when this binary re-spawned itself for a
-    // "Reload Window" — the child carries ROGCC_NO_SINGLE_INSTANCE so it doesn't
+    // "Reload Window" — the child carries --no-single-instance so it doesn't
     // see the still-registered parent and exit; the parent quits right after
-    // spawning, freeing the name for future reloads. The bypass is one-shot:
-    // consume it below so a reload triggered from *this* process can't pass the
-    // skip on to its own child (otherwise the guard stays off forever).
-    let skip_single_instance = std::env::var_os("ROGCC_NO_SINGLE_INSTANCE").is_some();
-    std::env::remove_var("ROGCC_NO_SINGLE_INSTANCE");
+    // spawning, freeing the name for future reloads.
+    let skip_single_instance = cli_parsed.no_single_instance;
     if !skip_single_instance {
         // Try to open a proxy and check for app state first
         let user_con = zbus::blocking::Connection::session()?;
@@ -107,9 +116,17 @@ async fn main() -> Result<()> {
     let startup_language = Config::new().load().language;
     if !startup_language.is_empty() {
         let locale = format!("{startup_language}.UTF-8");
-        env::set_var("LANG", &locale);
-        env::set_var("LC_ALL", &locale);
-        env::set_var("LANGUAGE", &startup_language);
+        // SAFETY: These run before any threads are spawned (before Runtime::new),
+        // so no concurrent getenv can race with this setenv.
+        unsafe {
+            env::set_var("LANG", &locale);
+        }
+        unsafe {
+            env::set_var("LC_ALL", &locale);
+        }
+        unsafe {
+            env::set_var("LANGUAGE", &startup_language);
+        }
     }
 
     // start tokio
@@ -120,17 +137,52 @@ async fn main() -> Result<()> {
     #[cfg(feature = "tokio-debug")]
     console_subscriber::init();
 
-    let state_zbus = ROGCCZbus::new();
-    let app_state = state_zbus.clone_state();
-    let conn = zbus::connection::Builder::session()?
-        .name(ZBUS_IFACE)?
-        .serve_at(ZBUS_PATH, state_zbus)?
-        .build()
-        .await
-        .map_err(|err| {
-            warn!("{}: add_to_server {}", ZBUS_PATH, err);
-            err
-        })?;
+    let (conn, app_state) = {
+        let mut last_err: Option<zbus::Error> = None;
+        let mut connection = None;
+        let mut shared_state = None;
+        for attempt in 0..5u32 {
+            let state_zbus = ROGCCZbus::new();
+            let cloned = state_zbus.clone_state();
+
+            // Build the connection, catching any registration errors (e.g.
+            // NameTaken when the child races the parent during reload).
+            let build_result: zbus::Result<_> = async {
+                zbus::connection::Builder::session()?
+                    .name(ZBUS_IFACE)?
+                    .serve_at(ZBUS_PATH, state_zbus)?
+                    .build()
+                    .await
+            }
+            .await;
+
+            match build_result {
+                Ok(c) => {
+                    connection = Some(c);
+                    shared_state = Some(cloned);
+                    break;
+                }
+                Err(e) => {
+                    warn!(
+                        "D-Bus name registration attempt {} failed: {e}",
+                        attempt + 1
+                    );
+                    last_err = Some(e);
+                    if attempt < 4 {
+                        tokio::time::sleep(std::time::Duration::from_millis(200)).await;
+                    }
+                }
+            }
+        }
+        match (connection, shared_state) {
+            (Some(c), Some(s)) => (c, s),
+            _ => {
+                return Err(last_err
+                    .expect("D-Bus connection failed after retries")
+                    .into())
+            }
+        }
+    };
 
     let dmi = DMIID::new().unwrap_or_default();
     let board_name = dmi.board_name;
@@ -207,11 +259,13 @@ async fn main() -> Result<()> {
         }
     }
 
-    if std::env::var("RUST_TRANSLATIONS").is_ok() {
+    if std::env::var("ROGCC_USE_SYSTEM_TRANSLATIONS").is_ok() {
         log::debug!("Using system-installed translations");
         slint::init_translations!("/usr/share/locale/");
     } else {
         log::debug!("Using local translations");
+        // Dev builds use the source tree; installed packages set
+        // ROGCC_USE_SYSTEM_TRANSLATIONS=1 to use /usr/share/locale.
         slint::init_translations!(concat!(env!("CARGO_MANIFEST_DIR"), "/translations/"));
     }
 

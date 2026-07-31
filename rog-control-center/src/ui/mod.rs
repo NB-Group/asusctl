@@ -214,8 +214,12 @@ fn available_languages() -> Vec<SharedString> {
     // English is the source language (no .mo needed) — always present, so a
     // fresh config never lands on a translation by default.
     set.insert("en".to_owned());
+    // Dev builds: scan the source tree translations dir (harmless on installed
+    // builds — the dir won't exist, so read_dir returns Err and is skipped).
     let dev = concat!(env!("CARGO_MANIFEST_DIR"), "/translations");
-    for dir in [dev, "/usr/share/locale"] {
+    for dir in [
+        dev, "/usr/share/locale",
+    ] {
         if let Ok(entries) = std::fs::read_dir(dir) {
             for entry in entries.flatten() {
                 let path = entry.path();
@@ -266,57 +270,66 @@ pub fn setup_app_settings_page(
 ) {
     let config_copy = config.clone();
     let global = ui.global::<AppSettingsPageData>();
-    global.on_set_run_in_background(move |enable| {
-        if let Ok(mut lock) = config_copy.try_lock() {
+    global.on_set_run_in_background(move |enable| match config_copy.lock() {
+        Ok(mut lock) => {
             lock.run_in_background = enable;
             lock.write();
         }
+        Err(err) => error!("Could not save setting: {err}"),
     });
     let config_copy = config.clone();
-    global.on_set_startup_in_background(move |enable| {
-        if let Ok(mut lock) = config_copy.try_lock() {
+    global.on_set_startup_in_background(move |enable| match config_copy.lock() {
+        Ok(mut lock) => {
             lock.startup_in_background = enable;
             lock.write();
         }
+        Err(err) => error!("Could not save setting: {err}"),
     });
     let config_copy = config.clone();
-    global.on_set_enable_tray_icon(move |enable| {
-        if let Ok(mut lock) = config_copy.try_lock() {
+    global.on_set_enable_tray_icon(move |enable| match config_copy.lock() {
+        Ok(mut lock) => {
             lock.enable_tray_icon = enable;
             lock.write();
         }
+        Err(err) => error!("Could not save setting: {err}"),
     });
     let config_copy = config.clone();
-    global.on_set_enable_dgpu_notifications(move |enable| {
-        if let Ok(mut lock) = config_copy.try_lock() {
+    global.on_set_enable_dgpu_notifications(move |enable| match config_copy.lock() {
+        Ok(mut lock) => {
             lock.notifications.enabled = enable;
             lock.write();
         }
+        Err(err) => error!("Could not save setting: {err}"),
     });
     let config_copy = config.clone();
-    global.on_set_enable_autostart(move |enable| {
-        if let Ok(mut lock) = config_copy.try_lock() {
+    global.on_set_enable_autostart(move |enable| match config_copy.lock() {
+        Ok(mut lock) => {
             lock.enable_autostart = enable;
             let in_bg = super::config::is_autostart_in_background();
             lock.write();
             super::config::update_autostart(enable, in_bg);
         }
+        Err(err) => error!("Could not save setting: {err}"),
     });
     let config_copy = config.clone();
-    global.on_set_autostart_in_background(move |enable| {
-        if let Ok(lock) = config_copy.try_lock() {
+    global.on_set_autostart_in_background(move |enable| match config_copy.lock() {
+        Ok(lock) => {
             let autostart = lock.enable_autostart;
             super::config::update_autostart(autostart, enable);
         }
+        Err(err) => error!("Could not read setting: {err}"),
     });
 
-    if let Ok(lock) = config.try_lock() {
-        global.set_run_in_background(lock.run_in_background);
-        global.set_startup_in_background(lock.startup_in_background);
-        global.set_enable_tray_icon(lock.enable_tray_icon);
-        global.set_enable_dgpu_notifications(lock.notifications.enabled);
-        global.set_enable_autostart(lock.enable_autostart);
-        global.set_autostart_in_background(super::config::is_autostart_in_background());
+    match config.lock() {
+        Ok(lock) => {
+            global.set_run_in_background(lock.run_in_background);
+            global.set_startup_in_background(lock.startup_in_background);
+            global.set_enable_tray_icon(lock.enable_tray_icon);
+            global.set_enable_dgpu_notifications(lock.notifications.enabled);
+            global.set_enable_autostart(lock.enable_autostart);
+            global.set_autostart_in_background(super::config::is_autostart_in_background());
+        }
+        Err(err) => error!("Could not read config: {err}"),
     }
 
     global.set_show_global_shortcut_controls(shortcuts.is_some());
@@ -426,17 +439,23 @@ pub fn setup_app_settings_page(
     // Discover shipped translations at startup so the picker lists every
     // language without a hardcoded array.
     let codes = available_languages();
-    let configured_language = config
-        .try_lock()
-        .map(|lock| lock.language.clone())
-        .unwrap_or_default();
+    let configured_language = match config.lock() {
+        Ok(lock) => lock.language.clone(),
+        Err(err) => {
+            error!("Could not read config: {err}");
+            String::default()
+        }
+    };
     // Match the persisted language; fall back to "en" (source language), then
     // index 0 — so a stale config like the old "en_US" still lands on English.
     let current_idx = codes
         .iter()
         .position(|l| l.as_str() == configured_language.as_str())
         .or_else(|| codes.iter().position(|l| l.as_str() == "en"))
-        .unwrap_or(0) as i32;
+        .unwrap_or_else(|| {
+            log::warn!("No matching language found in available list; defaulting to index 0");
+            0
+        }) as i32;
     // The picker shows each language in its own name (standard for language
     // selectors); the raw code is what gets persisted, so keep both in lockstep.
     let display: Vec<SharedString> = codes
@@ -449,18 +468,19 @@ pub fn setup_app_settings_page(
     let config_copy = config.clone();
     global.on_cb_change_language(move |index: i32| {
         if let Some(code) = codes.get(index as usize) {
-            if let Ok(mut lock) = config_copy.try_lock() {
-                lock.language = code.to_string();
-                lock.write();
-                log::info!("Language changed to {code}; reload to apply");
-            } else {
-                log::warn!("config lock busy; language change to {code} not saved");
+            match config_copy.lock() {
+                Ok(mut lock) => {
+                    lock.language = code.to_string();
+                    lock.write();
+                    log::info!("Language changed to {code}; reload to apply");
+                }
+                Err(err) => error!("Could not save language setting: {err}"),
             }
         }
     });
 
     // Reload Window: spawn a fresh instance flagged to skip the single-instance
-    // guard (ROGCC_NO_SINGLE_INSTANCE), then quit this one. spawn+quit is
+    // guard (--no-single-instance), then quit this one. spawn+quit is
     // reliable where exec() was not: the old DBus name is released on quit and
     // the new image never races the check. The child re-reads config.language
     // and re-resolves @tr() in the chosen locale.
@@ -474,7 +494,7 @@ pub fn setup_app_settings_page(
         };
         log::info!("reload: spawning {:?}", exe);
         match std::process::Command::new(exe)
-            .env("ROGCC_NO_SINGLE_INSTANCE", "1")
+            .arg("--no-single-instance")
             .spawn()
         {
             Ok(_) => {
