@@ -409,7 +409,7 @@ export component PageSystem inherits Rectangle {
                                     color: Palette.control-foreground;
                                 }
                                 Text {
-                                    text: SystemPageData.cpu_fan_rpm + " RPM";
+                                    text: SystemPageData.cpu_fan_rpm >= 0 ? SystemPageData.cpu_fan_rpm + " RPM" : "--";
                                     font-weight: 700;
                                     color: Palette.control-foreground;
                                 }
@@ -422,13 +422,13 @@ export component PageSystem inherits Rectangle {
                                     color: Palette.control-foreground;
                                 }
                                 Text {
-                                    text: SystemPageData.gpu_fan_rpm + " RPM";
+                                    text: SystemPageData.gpu_fan_rpm >= 0 ? SystemPageData.gpu_fan_rpm + " RPM" : "--";
                                     font-weight: 700;
                                     color: Palette.control-foreground;
                                 }
                             }
 
-                            if SystemPageData.mid_fan_rpm > 0: HorizontalLayout {
+                            if SystemPageData.mid_fan_rpm >= 0: HorizontalLayout {
                                 alignment: LayoutAlignment.space-between;
                                 Text {
                                     text: @tr("Mid Fan:");
