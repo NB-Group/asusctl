@@ -146,7 +146,7 @@ export component PageBattery inherits RogPage {
                             Rectangle { horizontal-stretch: 1; }
                             Text {
                                 text: "\{SystemPageData.battery_health}%";
-                                color: SystemPageData.battery_health > 80 ? #4CAF50 : (SystemPageData.battery_health > 50 ? #FF9E1B : #FF1929);
+                                color: SystemPageData.battery_health > 80 ? Theme.state-good : (SystemPageData.battery_health > 50 ? Theme.state-warn : Theme.state-danger);
                                 font-size: 28px;
                                 font-weight: 800;
                                 font-family: "Inter Display";
