@@ -4,8 +4,8 @@
 import { Palette } from "std-widgets.slint";
 
 export global AppSize {
-    out property <length> width: 1000px;
-    out property <length> height: 640px;
+    out property <length> width: 900px;
+    out property <length> height: 560px;
 }
 
 export global Theme {
@@ -78,6 +78,9 @@ export global Theme {
     out property <color> success:       #4CAF50;
     out property <color> warn:          #FF9E1B;
     out property <color> danger:        #FF1929;
+
+    // — Aura reset colour (factory-default white for "Reset Defaults" button) —
+    out property <color> aura-reset-colour: #FFFFFF;
 
     // — Corner radii —
     out property <length> radius-card: 8px;
