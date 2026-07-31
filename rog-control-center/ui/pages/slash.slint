@@ -76,7 +76,9 @@ component SlashSwitch inherits Rectangle {
     width: 46px;
     height: 24px;
     border-radius: 4px;
-    background: root.enabled ? Theme.fg-normal : Theme.text-dim;
+    // Track flips with the theme (fg-normal inverts and would render an
+    // unreadable dark pill in light mode). Red when active, neutral otherwise.
+    background: root.enabled ? (root.checked ? Theme.rog-red : Theme.toggle-off) : Theme.text-dim;
     opacity: root.enabled ? 1.0 : 0.55;
 
     Text {
@@ -84,7 +86,7 @@ component SlashSwitch inherits Rectangle {
         width: 18px;
         height: 100%;
         text: root.checked ? "ON" : "OFF";
-        color: #333333;
+        color: root.checked ? #FFFFFF : Theme.text-primary;
         font-size: 10px;
         horizontal-alignment: center;
         vertical-alignment: center;
@@ -95,7 +97,9 @@ component SlashSwitch inherits Rectangle {
         width: 18px;
         height: 18px;
         border-radius: 4px;
-        background: #202020;
+        background: #FFFFFF;
+        border-width: 1px;
+        border-color: Theme.line;
         animate x { duration: 120ms; easing: ease; }
     }
     TouchArea {
@@ -296,7 +300,10 @@ component SlashDevicePreview inherits Rectangle {
         clip: true;
 
         Image {
-            source: @image-url("../images/slash-device-shell.svg");
+            // The lid is a filled render, not line-art, so it needs a separate
+            // light variant instead of a tint. Swap with the theme.
+            source: Theme.dark ? @image-url("../images/slash-device-shell.svg")
+                               : @image-url("../images/slash-device-shell-light.svg");
             width: 100%;
             height: 100%;
             image-fit: fill;

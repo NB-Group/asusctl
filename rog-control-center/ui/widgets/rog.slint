@@ -498,8 +498,8 @@ export component RogProductCard inherits Rectangle {
         Rectangle {
             vertical-stretch: 1;
             min-height: 160px;
-            // Gradient background (matches the AC purple-red)
-            background: #15101e;
+            // Hero panel: dark purple-red in dark mode, soft lavender in light.
+            background: Theme.dark ? #15101e : #ECEAF2;
 
             if root.product-image.width > 0: Image {
                 source: root.product-image;
@@ -510,32 +510,13 @@ export component RogProductCard inherits Rectangle {
                 image-fit: contain;
             }
             if root.product-image.width == 0: Image {
-                source: @image-url("../images/laptop-placeholder.svg");
-                width: 85%;
-                height: 90%;
+                source: Theme.dark ? @image-url("../images/laptop-placeholder.svg")
+                                   : @image-url("../images/laptop-placeholder-light.svg");
+                width: 94%;
+                height: 94%;
                 horizontal-alignment: center;
                 vertical-alignment: center;
                 image-fit: contain;
-            }
-
-            // ROG-style slash accent
-            Rectangle {
-                x: parent.width * 0.15;
-                y: parent.height * 0.2;
-                width: 30px;
-                height: 3px;
-                background: Theme.rog-red;
-                opacity: 0.3;
-                transform-rotation: -42deg;
-            }
-            Rectangle {
-                x: parent.width * 0.65;
-                y: parent.height * 0.6;
-                width: 24px;
-                height: 2.5px;
-                background: #6437FF;
-                opacity: 0.25;
-                transform-rotation: -42deg;
             }
         }
         // Text info area

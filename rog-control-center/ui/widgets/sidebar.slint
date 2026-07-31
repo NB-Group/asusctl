@@ -4,6 +4,7 @@
 //
 // New menu entry = one NavItemData row in `model` (no separate icon array to
 // keep in sync). The for-repeater scales automatically.
+import { ScrollView } from "std-widgets.slint";
 import { Theme } from "../globals.slint";
 
 // One nav entry: title (i18n + a11y label) + icon. Add new pages here only.
@@ -95,24 +96,25 @@ export component SideBar inherits Rectangle {
         // Divider
         HorizontalDivider { }
 
-        // — Nav item list (single source: title + icon travel together) —
-        VerticalLayout {
-            spacing: 2px;
-            accessible-role: tab-list;
-            accessible-orientation: Orientation.vertical;
-            accessible-item-count: root.model.length;
-            for item[index] in root.model: NavItem {
-                enabled: index < root.available.length && root.available[index];
-                icon: item.icon;
-                accessible-label: item.title;
-                selected: index == root.current-item;
-                clicked => { root.current-item = index; }
-            }
-        }
-
-        // Bottom flex space + quit button
-        Rectangle {
+        // — Nav item list. Scrolls vertically when the window is too short to
+        // fit every entry, instead of clipping or collapsing the icons. logo
+        // stays pinned at top, quit at bottom; the list fills the middle. —
+        ScrollView {
             vertical-stretch: 1;
+            VerticalLayout {
+                spacing: 2px;
+                alignment: start;
+                accessible-role: tab-list;
+                accessible-orientation: Orientation.vertical;
+                accessible-item-count: root.model.length;
+                for item[index] in root.model: NavItem {
+                    enabled: index < root.available.length && root.available[index];
+                    icon: item.icon;
+                    accessible-label: item.title;
+                    selected: index == root.current-item;
+                    clicked => { root.current-item = index; }
+                }
+            }
         }
 
         // Divider
