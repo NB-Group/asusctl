@@ -28,5 +28,9 @@ AGENTS.md
 
 *.log
 
+# Compiled gettext binaries — .po sources are tracked, .mo are build artifacts
+# compiled from source at build time (see rog-control-center/build.rs).
+*.mo
+
 # Git should not follow this IN ANY CASE
 Cargo.lock
