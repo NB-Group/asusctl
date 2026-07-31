@@ -165,33 +165,41 @@ fn set_gpu_mode(caps: Arc<GpuCaps>, handle: Weak<MainWindow>, mode: GpuMode) {
     });
 }
 
-fn set_apu_mem(proxy: AsusArmouryProxy<'static>, handle: Weak<MainWindow>, value: i32) {
-    let p = proxy.clone();
-    let w = handle.clone();
-    tokio::spawn(async move {
-        let result = p.set_current_value(value).await;
-        show_toast(
-            SharedString::from(
-                "Reserved GPU memory updated — reboot required for changes to apply.",
-            ),
-            SharedString::from("Failed to set reserved GPU memory"),
-            w.clone(),
-            result,
-        );
+async fn set_apu_mem(proxy: AsusArmouryProxy<'static>, handle: Weak<MainWindow>, value: i32) {
+    let result = proxy.set_current_value(value).await;
+    show_toast(
+        SharedString::from("Reserved GPU memory updated — reboot required for changes to apply."),
+        SharedString::from("Failed to set reserved GPU memory"),
+        handle.clone(),
+        result,
+    );
 
-        // Refresh the dropdown to show the (possibly unchanged) hardware state.
-        let new_current = p.current_value().await.unwrap_or(value);
-        let choices = p.possible_values().await.unwrap_or_default();
-        let new_index = choices.iter().position(|v| *v == new_current).unwrap_or(0) as i32;
-        // Refresh the labels too: the firmware's option set can change after a
-        // write, so a stale model would leave the dropdown out of sync.
-        let labels: Vec<SharedString> = choices.iter().map(|v| apu_mem_val_to_label(*v)).collect();
-        w.upgrade_in_event_loop(move |h| {
-            h.global::<GPUPageData>().set_apu_mem_choices(labels.as_slice().into());
+    // Refresh the dropdown to show the (possibly unchanged) hardware state.
+    let new_current = proxy.current_value().await.unwrap_or_else(|e| {
+        log::error!("setup_gpu: failed to read apu_mem current_value after write: {e}");
+        value
+    });
+    let choices = proxy.possible_values().await.unwrap_or_else(|e| {
+        log::error!("setup_gpu: failed to read apu_mem possible_values after write: {e}");
+        Vec::new()
+    });
+    let new_index = choices
+        .iter()
+        .position(|v| *v == new_current)
+        .unwrap_or_else(|| {
+            log::warn!("setup_gpu: apu_mem value not found in possible values after write");
+            0
+        }) as i32;
+    // Refresh the labels too: the firmware's option set can change after a
+    // write, so a stale model would leave the dropdown out of sync.
+    let labels: Vec<SharedString> = choices.iter().map(|v| apu_mem_val_to_label(*v)).collect();
+    handle
+        .upgrade_in_event_loop(move |h| {
+            h.global::<GPUPageData>()
+                .set_apu_mem_choices(labels.as_slice().into());
             h.global::<GPUPageData>().set_apu_mem_index(new_index);
         })
         .unwrap_or_else(|e| error!("setup_gpu: failed to refresh apu_mem index: {e:?}"));
-    });
 }
 
 fn apu_mem_val_to_label(value: i32) -> SharedString {
@@ -261,11 +269,23 @@ pub fn setup_gpu_page(ui: &MainWindow) {
         .await;
 
         if let Some(proxy) = apu_mem_proxy {
-            let possible = proxy.possible_values().await.unwrap_or_default();
-            let current = proxy.current_value().await.unwrap_or(0);
+            let possible = proxy.possible_values().await.unwrap_or_else(|e| {
+                log::error!("setup_gpu: failed to read apu_mem possible_values: {e}");
+                Vec::new()
+            });
+            let current = proxy.current_value().await.unwrap_or_else(|e| {
+                log::warn!("setup_gpu: failed to read apu_mem current_value: {e}");
+                0
+            });
             let apu_choices: Vec<SharedString> =
                 possible.iter().map(|v| apu_mem_val_to_label(*v)).collect();
-            let apu_index = possible.iter().position(|v| *v == current).unwrap_or(0) as i32;
+            let apu_index = possible
+                .iter()
+                .position(|v| *v == current)
+                .unwrap_or_else(|| {
+                    log::warn!("setup_gpu: apu_mem index not found in possible values");
+                    0
+                }) as i32;
 
             let proxy_cb = proxy.clone();
             let handle_cb = handle.clone();
@@ -283,7 +303,12 @@ pub fn setup_gpu_page(ui: &MainWindow) {
                     // stale or wrong value otherwise.
                     tokio::spawn(async move {
                         let possible: Vec<i32> =
-                            proxy_cb.possible_values().await.unwrap_or_default();
+                            proxy_cb.possible_values().await.unwrap_or_else(|e| {
+                                log::error!(
+                                    "setup_gpu: failed to read apu_mem possible_values: {e}"
+                                );
+                                Vec::new()
+                            });
                         let Some(value) = possible.get(index as usize).copied() else {
                             return;
                         };
@@ -294,7 +319,7 @@ pub fn setup_gpu_page(ui: &MainWindow) {
                             .unwrap_or_else(|e| {
                                 error!("setup_gpu: failed to set apu_mem index: {e:?}")
                             });
-                        set_apu_mem(proxy_cb.clone(), handle_cb.clone(), value);
+                        set_apu_mem(proxy_cb.clone(), handle_cb.clone(), value).await;
                     });
                 });
             }) {
@@ -309,7 +334,10 @@ pub fn setup_gpu_page(ui: &MainWindow) {
                 return None;
             };
             let xgm_proxy = proxies.pop()?;
-            let enabled = xgm_proxy.xgm_led_enabled().await.unwrap_or(false);
+            let enabled = xgm_proxy.xgm_led_enabled().await.unwrap_or_else(|e| {
+                log::error!("setup_gpu: failed to read xgm_led_enabled: {e}");
+                false
+            });
             Some((xgm_proxy, enabled))
         }
         .await;
@@ -381,7 +409,10 @@ pub fn setup_gpu_page(ui: &MainWindow) {
         let initial = platform_proxy
             .disable_nvidia_powerd_on_battery()
             .await
-            .unwrap_or(true);
+            .unwrap_or_else(|e| {
+                log::error!("setup_gpu: failed to read disable_nvidia_powerd_on_battery: {e}");
+                true
+            });
         handle
             .upgrade_in_event_loop(move |h| {
                 h.global::<GPUPageData>()
