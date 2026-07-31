@@ -1,52 +1,50 @@
 // rog-control-center — AC-style sidebar (matched against the AC f001 screenshot)
 // Narrow icon bar (~56px): ROG logo + icon nav + quit button.
 // Selected state: #5A2025 dark-red fill + a left red indicator bar.
+//
+// New menu entry = one NavItemData row in `model` (no separate icon array to
+// keep in sync). The for-repeater scales automatically.
 import { Theme } from "../globals.slint";
 
-// — Single nav item: icon + optional small label + selected red bar —
+// One nav entry: title (i18n + a11y label) + icon. Add new pages here only.
+export struct NavItemData {
+    title: string,
+    icon: image,
+}
+
+// — Single nav item: icon + selected red bar —
 export component NavItem inherits Rectangle {
     in property <bool> selected: false;
     in property <image> icon;
-    in property <string> label: "";
     in property <bool> enabled: true;
     callback clicked();
-    width: 56px;
+    width: 100%;
     height: 48px;
-
-    // Selected background
-    bg := Rectangle {
-        width: 100%;
-        height: 100%;
-        background: root.selected ? Theme.sidebar-selected : transparent;
-        visible: root.selected;
-    }
+    accessible-role: tab;
+    accessible-item-selectable: true;
+    accessible-item-selected: root.selected;
+    accessible-action-default => { root.clicked(); }
+    background: root.selected ? Theme.sidebar-selected : transparent;
 
     // Left red indicator (only when selected)
     if root.selected: Rectangle {
         x: 0px;
-        y: 8px;
+        y: (parent.height - self.height) / 2;
         width: 3px;
         height: 32px;
         background: Theme.rog-red;
         border-radius: 1.5px;
     }
 
-    // Icon + label (absolutely positioned, centered)
+    // Icon (centered)
     Image {
         source: root.icon;
         colorize: root.enabled ? (root.selected ? Theme.text-primary : Theme.text-secondary) : Theme.fg-disabled;
         width: 22px;
         height: 22px;
         x: (parent.width - self.width) / 2;
-        y: (parent.height - self.height) / 2 - (root.label != "" ? 6px : 0px);
+        y: (parent.height - self.height) / 2;
         image-fit: contain;
-    }
-    if root.label != "": Text {
-        text: root.label;
-        color: root.selected ? Theme.text-primary : Theme.text-dim;
-        font-size: 9px;
-        x: (parent.width - self.width) / 2;
-        y: parent.height - self.height - 8px;
     }
 
     ta := TouchArea {
@@ -57,10 +55,16 @@ export component NavItem inherits Rectangle {
     }
 }
 
+component HorizontalDivider inherits Rectangle {
+    height: 1px;
+    width: 100%;
+    background: Theme.divider;
+}
+
 // — AC-style sidebar —
 export component SideBar inherits Rectangle {
-    in property <[string]> model: [];
-    in property <[bool]> available: [];
+    in property <[NavItemData]> model;
+    in property <[bool]> available;
     in property <bool> is_tuf: false;
     out property <int> current-item: 0;
 
@@ -68,32 +72,10 @@ export component SideBar inherits Rectangle {
     width: 56px;
     clip: true;
 
-    // Nav icon mapping (order matches the model in main_window.slint):
-    // 0=Home 1=Aura 2=AniMe Matrix 3=Slash Lighting 4=Fan Curves
-    // 5=GPU Configuration 6=Battery Info 7=App Settings 8=About
-    property <[image]> nav-icons: [
-        @image-url("../images/nav-home.svg"),
-        @image-url("../images/nav-keyboard.svg"),
-        @image-url("../images/nav-matrix.svg"),
-        @image-url("../images/nav-slash.svg"),
-        @image-url("../images/nav-fan.svg"),
-        @image-url("../images/nav-gpu.svg"),
-        @image-url("../images/nav-battery.svg"),
-        @image-url("../images/nav-apps.svg"),
-        @image-url("../images/nav-about.svg"),
-    ];
-
-    // Small labels (AC style, optional, default empty)
-    property <[string]> nav-labels: [
-        "", "", "", "", "",
-        "", "", "", "",
-    ];
-
     VerticalLayout {
         spacing: 2px;
         padding-top: 12px;
         padding-bottom: 8px;
-        alignment: center;
 
         // — ROG logo —
         Rectangle {
@@ -111,36 +93,30 @@ export component SideBar inherits Rectangle {
         }
 
         // Divider
-        Rectangle {
-            height: 1px;
-            width: 36px;
-            background: Theme.divider;
-        }
+        HorizontalDivider { }
 
-        // — Nav item list —
+        // — Nav item list (single source: title + icon travel together) —
         VerticalLayout {
             spacing: 2px;
-            padding-top: 8px;
-            alignment: center;
+            accessible-role: tab-list;
+            accessible-orientation: Orientation.vertical;
+            accessible-item-count: root.model.length;
             for item[index] in root.model: NavItem {
-                visible: true;
                 enabled: index < root.available.length && root.available[index];
-                icon: root.nav-icons[index];
-                label: root.nav-labels[index];
+                icon: item.icon;
+                accessible-label: item.title;
                 selected: index == root.current-item;
                 clicked => { root.current-item = index; }
             }
         }
 
         // Bottom flex space + quit button
-        Rectangle { vertical-stretch: 1; }
+        Rectangle {
+            vertical-stretch: 1;
+        }
 
         // Divider
-        Rectangle {
-            height: 1px;
-            width: 36px;
-            background: Theme.divider;
-        }
+        HorizontalDivider { }
 
         // Quit button
         Rectangle {
@@ -149,11 +125,12 @@ export component SideBar inherits Rectangle {
             background: transparent;
             Text {
                 text: @tr("Quit");
-                color: Theme.text-dim;
-                font-size: 10px;
+                color: Theme.text-primary;
+                font-size: Theme.font-md;
                 horizontal-alignment: center;
                 vertical-alignment: center;
             }
+
             ta := TouchArea {
                 width: 100%;
                 height: 100%;

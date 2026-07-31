@@ -67,26 +67,23 @@ export component MainWindow inherits Window {
 
     HorizontalLayout {
         padding: 0px;
-        VerticalLayout {
-            padding: 0px;
-            side-bar := SideBar {
-                quit-clicked => { root.exit-app(); }
-                model: [
-                    @tr("Menu1" => "System Control"),
-                    @tr("Menu2" => "Keyboard Aura"),
-                    @tr("Menu3" => "AniMe Matrix"),
-                    @tr("Menu4" => "Slash Lighting"),
-                    @tr("Menu5" => "Fan Curves"),
-                    @tr("Menu6" => "GPU Configuration"),
-                    @tr("Menu9" => "Battery Info"),
-                    @tr("Menu7" => "App Settings"),
-                    @tr("Menu8" => "About"),
-                ];
-                available: root.sidebar_items_avilable;
-                is_tuf: root.is_tuf;
-            }
-
-            // Quit button lives inside SideBar now (quit-clicked callback).
+        side-bar := SideBar {
+            quit-clicked => { root.exit-app(); }
+            // Title + icon travel together as one model — no separate icon array
+            // to keep in sync when entries are added or reordered.
+            model: [
+                { title: @tr("Menu1" => "System Control"), icon: @image-url("images/nav-home.svg") },
+                { title: @tr("Menu2" => "Keyboard Aura"), icon: @image-url("images/nav-keyboard.svg") },
+                { title: @tr("Menu3" => "AniMe Matrix"), icon: @image-url("images/nav-matrix.svg") },
+                { title: @tr("Menu4" => "Slash Lighting"), icon: @image-url("images/nav-slash.svg") },
+                { title: @tr("Menu5" => "Fan Curves"), icon: @image-url("images/nav-fan.svg") },
+                { title: @tr("Menu6" => "GPU Configuration"), icon: @image-url("images/nav-gpu.svg") },
+                { title: @tr("Menu9" => "Battery Info"), icon: @image-url("images/nav-battery.svg") },
+                { title: @tr("Menu7" => "App Settings"), icon: @image-url("images/nav-apps.svg") },
+                { title: @tr("Menu8" => "About"), icon: @image-url("images/nav-about.svg") },
+            ];
+            available: root.sidebar_items_avilable;
+            is_tuf: root.is_tuf;
         }
 
         Rectangle {
