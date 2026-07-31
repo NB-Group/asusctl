@@ -63,6 +63,11 @@ export component MainWindow inherits Window {
     }
     min-height: AppSize.height;
     min-width: AppSize.width;
+    // Explicit larger max so the window is resizable (pages bind their height to
+    // root.height, which otherwise makes Slint treat the window as a fixed size
+    // — GNOME then refuses edge-resizing past the default, only fullscreen works).
+    max-width: 2560px;
+    max-height: 2000px;
     background: Theme.bg-base;
 
     HorizontalLayout {

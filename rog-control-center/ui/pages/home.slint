@@ -2,7 +2,6 @@
 // Layout: HorizontalLayout 2-col (left 360px fixed + right flexible), no ScrollView (avoids binding loops)
 // Font: Inter Display for product name
 // Data: all from SystemPageData, no hardcoded values
-import { ScrollView } from "std-widgets.slint";
 import { RogProductCard, RogSlashMark, RogMetric, RogReading, RogStatRow, RogPage } from "../widgets/rog.slint";
 import { Theme } from "../globals.slint";
 import { SystemPageData } from "system.slint";
@@ -43,11 +42,7 @@ export component PageHome inherits RogPage {
             padding-bottom: 24px;
             spacing: 0px;
 
-            // Scroll when the window is too short to fit everything (e.g. the
-            // Operation Mode row at the bottom). Content is natural-height and
-            // top-aligned — no stretch spacers, which would fight the ScrollView.
-            ScrollView {
-                HorizontalLayout {
+            HorizontalLayout {
                 spacing: 36px;
 
                 // Left column: product card (kept square)
@@ -144,6 +139,9 @@ export component PageHome inherits RogPage {
                         }
                     }
 
+                    // Vertical flex gap: grows in fullscreen, keeps the rows apart.
+                    Rectangle { vertical-stretch: 1; min-height: 0px; }
+
                     // Row 2: Fan | Memory
                     HorizontalLayout {
                         vertical-stretch: 0;
@@ -182,6 +180,9 @@ export component PageHome inherits RogPage {
                             }
                         }
                     }
+
+                    // Vertical flex gap before the mode section.
+                    Rectangle { vertical-stretch: 1; min-height: 0px; }
 
                     // Operation Mode section — switches the real asusd platform
                     // profile. Buttons are generated from the device's actual
@@ -274,7 +275,6 @@ export component PageHome inherits RogPage {
                         }
                     }
                 }
-            }
             }
         }
     }
