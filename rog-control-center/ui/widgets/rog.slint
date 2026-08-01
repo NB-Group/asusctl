@@ -678,9 +678,11 @@ export component RogEffectButton inherits VerticalLayout {
     in property <image> icon;
     in property <string> label;
     in property <bool> selected: false;  // read-only from parent, do NOT self-assign
+    in property <bool> enabled: true;
     callback clicked();
     spacing: 10px;
     alignment: center;
+    opacity: root.enabled ? 1.0 : 0.35;
 
     // Circle background
     outer := Rectangle {
@@ -712,6 +714,7 @@ export component RogEffectButton inherits VerticalLayout {
         }
 
         ta := TouchArea {
+            enabled: root.enabled;
             clicked => { root.clicked(); }
         }
     }
