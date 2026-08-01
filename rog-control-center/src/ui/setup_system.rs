@@ -87,6 +87,33 @@ pub fn setup_system_page(
         .set_dgpu_name(dgpu_model.into());
     ui.global::<SystemPageData>().set_has_igpu(has_igpu);
 
+    // Real product name from DMI (e.g. "ROG Zephyrus G16 GU605MV")
+    // Read off the UI thread to avoid blocking on sysfs I/O.
+    let weak = ui.as_weak();
+    tokio::spawn(async move {
+        let product_name = tokio::task::spawn_blocking(|| {
+            match std::fs::read_to_string("/sys/class/dmi/id/product_name") {
+                Ok(s) => s.trim().to_string(),
+                Err(e) => {
+                    log::debug!("DMI product_name unreadable: {e}");
+                    String::new()
+                }
+            }
+        })
+        .await
+        .unwrap_or_else(|e| {
+            log::warn!("setup_system: DMI spawn_blocking task failed: {e}");
+            String::new()
+        });
+        if !product_name.is_empty() {
+            weak.upgrade_in_event_loop(move |ui| {
+                ui.global::<SystemPageData>()
+                    .set_product_name(product_name.into());
+            })
+            .ok();
+        }
+    });
+
     if let Ok(sys_props) = platform
         .supported_properties()
         .map_err(|e| log::error!("Failed to get supported properties: {}", e))
@@ -147,6 +174,15 @@ pub fn setup_system_page(
             let igpu_temp = rog_platform::gpu_pci::get_igpu_temp();
             let (cpu_fan, gpu_fan, mid_fan) = rog_platform::platform::get_fan_rpms();
             let cpu_freq = rog_platform::cpu::get_cpu_frequency_mhz();
+            // When the dGPU is powered off or unavailable,
+            // get_gpu_frequency_mhz returns None. Use 0.0 as the
+            // fallback so the UI can display "N/A" or "Off" instead of
+            // "-1.0 MHz". Skip the read entirely if no dGPU exists.
+            let gpu_freq = if has_dgpu {
+                rog_platform::gpu_pci::get_gpu_frequency_mhz().unwrap_or(0.0)
+            } else {
+                0.0
+            };
             let ram_usage = rog_platform::cpu::get_ram_usage_pct();
             let gpu_usage = rog_platform::gpu_pci::get_gpu_usage_pct();
             let igpu_usage = rog_platform::gpu_pci::get_igpu_usage_pct();
@@ -183,6 +219,7 @@ pub fn setup_system_page(
                 data.set_igpu_usage_val(igpu_usage);
                 data.set_ram_usage_val(ram_usage);
                 data.set_cpu_freq_mhz(cpu_freq);
+                data.set_gpu_freq_mhz(gpu_freq);
                 data.set_cpu_fan_rpm(cpu_fan);
                 data.set_gpu_fan_rpm(gpu_fan);
                 data.set_mid_fan_rpm(mid_fan);

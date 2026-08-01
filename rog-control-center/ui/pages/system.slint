@@ -1,6 +1,7 @@
 import { SystemSlider, SystemDropdown, SystemToggle, SystemToggleInt, RogItem } from "../widgets/common.slint";
 import { Palette, HorizontalBox , VerticalBox, ScrollView, Slider, Button, Switch, ComboBox, GroupBox, StandardButton} from "std-widgets.slint";
 import { FanPageData } from "../types/fan_types.slint";
+import { Theme } from "../globals.slint";
 
 export struct AttrMinMax {
   min: int,
@@ -163,6 +164,7 @@ export global SystemPageData {
     in-out property <float> gpu_usage_val: -1.0;
     in-out property <float> ram_usage_val: -1.0;
     in-out property <float> cpu_freq_mhz: -1.0;
+    in-out property <float> gpu_freq_mhz: -1.0;
     in-out property <int> cpu_fan_rpm: -1;
     in-out property <int> gpu_fan_rpm: -1;
     in-out property <int> mid_fan_rpm: -1;
@@ -173,6 +175,9 @@ export global SystemPageData {
     in-out property <float> igpu_temp_val: -1.0;
     in-out property <float> igpu_usage_val: -1.0;
     in-out property <bool> has_igpu: false;
+
+    // Real product name from DMI (read in setup_system.rs).
+    in-out property <string> product_name: "";
 }
 
 export component PageSystem inherits Rectangle {
@@ -260,7 +265,7 @@ export component PageSystem inherits Rectangle {
                                 Text {
                                     text: Math.round(SystemPageData.cpu_temp_val) + " °C";
                                     font-weight: 700;
-                                    color: SystemPageData.cpu_temp_val > 80 ? #ef4444 : (SystemPageData.cpu_temp_val > 65 ? #eab308 : #22c55e);
+                                    color: SystemPageData.cpu_temp_val > 0.0 ? Theme.temp-color(SystemPageData.cpu_temp_val) : Palette.control-foreground;
                                 }
                             }
                             
@@ -308,7 +313,7 @@ export component PageSystem inherits Rectangle {
                                 Text {
                                     text: SystemPageData.igpu_temp_val > 0.0 ? (Math.round(SystemPageData.igpu_temp_val) + " °C") : @tr("N/A");
                                     font-weight: 700;
-                                    color: SystemPageData.igpu_temp_val > 80 ? #ef4444 : (SystemPageData.igpu_temp_val > 65 ? #eab308 : (SystemPageData.igpu_temp_val > 0.0 ? #22c55e : Palette.control-foreground));
+                                    color: SystemPageData.igpu_temp_val > 0.0 ? Theme.temp-color(SystemPageData.igpu_temp_val) : Palette.control-foreground;
                                 }
                             }
                             
@@ -371,7 +376,7 @@ export component PageSystem inherits Rectangle {
                                 Text {
                                     text: SystemPageData.gpu_temp_val > 0.0 ? (Math.round(SystemPageData.gpu_temp_val) + " °C") : @tr("N/A");
                                     font-weight: 700;
-                                    color: SystemPageData.gpu_temp_val > 80 ? #ef4444 : (SystemPageData.gpu_temp_val > 65 ? #eab308 : (SystemPageData.gpu_temp_val > 0.0 ? #22c55e : Palette.control-foreground));
+                                    color: SystemPageData.gpu_temp_val > 0.0 ? Theme.temp-color(SystemPageData.gpu_temp_val) : Palette.control-foreground;
                                 }
                             }
                             
@@ -404,7 +409,7 @@ export component PageSystem inherits Rectangle {
                                     color: Palette.control-foreground;
                                 }
                                 Text {
-                                    text: SystemPageData.cpu_fan_rpm + " RPM";
+                                    text: SystemPageData.cpu_fan_rpm >= 0 ? SystemPageData.cpu_fan_rpm + " RPM" : "--";
                                     font-weight: 700;
                                     color: Palette.control-foreground;
                                 }
@@ -417,13 +422,13 @@ export component PageSystem inherits Rectangle {
                                     color: Palette.control-foreground;
                                 }
                                 Text {
-                                    text: SystemPageData.gpu_fan_rpm + " RPM";
+                                    text: SystemPageData.gpu_fan_rpm >= 0 ? SystemPageData.gpu_fan_rpm + " RPM" : "--";
                                     font-weight: 700;
                                     color: Palette.control-foreground;
                                 }
                             }
 
-                            if SystemPageData.mid_fan_rpm > 0: HorizontalLayout {
+                            if SystemPageData.mid_fan_rpm >= 0: HorizontalLayout {
                                 alignment: LayoutAlignment.space-between;
                                 Text {
                                     text: @tr("Mid Fan:");
