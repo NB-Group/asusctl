@@ -366,7 +366,7 @@ msgstr "呼吸"
 #, fuzzy
 msgctxt "Basic aura mode"
 msgid "Strobe"
-msgstr "频谱"
+msgstr "频闪"
 
 #: rog-control-center/ui/types/aura_types.slint:75
 #, fuzzy
@@ -538,7 +538,9 @@ msgctxt "Menu4"
 msgid "Fan Curves"
 msgstr "风扇曲线"
 
-msgid "Edit the fan curve for each performance profile and fan — this does not change the active profile."
+msgid ""
+"Edit the fan curve for each performance profile and fan — this does not "
+"change the active profile."
 msgstr "为每个性能模式与风扇编辑风扇曲线——这不会切换当前活动模式。"
 
 msgid "This fan is not available on this machine"
@@ -791,7 +793,6 @@ msgctxt "PageHome"
 msgid "Edit Manual Mode"
 msgstr "编辑手动模式"
 
-
 #: rog-control-center/ui/pages/home.slint
 msgctxt "PageHome"
 msgid "Silent"
@@ -847,12 +848,12 @@ msgctxt "PageGPU"
 msgid ""
 "[Recommended] In eco mode, automatically optimizes based on usage scenarios "
 "and connected displays."
-msgstr "[推荐] 充电模式下，自动为大量显示运算的应用场景自动切换使用独立显卡。"
+msgstr "[推荐] 在节能模式下，根据使用场景和连接的显示器自动优化。"
 
 #: rog-control-center/ui/pages/gpu.slint
 msgctxt "PageGPU"
 msgid "Auto-notify when external display is disconnected to save power."
-msgstr "当未使用外接显示器情况时允许自动弹出通知，提醒您停止应用程序并节省电量"
+msgstr "外接显示器断开时自动通知以节省电量。"
 
 #: rog-control-center/ui/pages/gpu.slint
 msgctxt "PageGPU"
@@ -1013,7 +1014,8 @@ msgstr "混合输出"
 
 #: rog-control-center/ui/pages/gpu.slint
 msgctxt "PageGPU"
-msgid "Auto-switches between the discrete and integrated GPUs based on workload."
+msgid ""
+"Auto-switches between the discrete and integrated GPUs based on workload."
 msgstr "根据负载在独立显卡和集成显卡之间自动切换。"
 
 #: rog-control-center/ui/pages/gpu.slint
@@ -1185,3 +1187,779 @@ msgstr "需要重启后新语言才会生效。"
 msgctxt "PageAppSettings"
 msgid "Reload Window"
 msgstr "重载窗口"
+
+# ============================================================
+#  System Tuning page (AC redesign)
+#  - plain @tr() in SystemPageData global  -> msgctxt "SystemPageData"
+#  - plain @tr() in PageSystem component   -> msgctxt "PageSystem"
+#  - @tr("key" => "default")               -> msgctxt = key, msgid = default
+# ============================================================
+#: rog-control-center/ui/pages/system.slint
+msgctxt "SystemPageData"
+msgid "Balanced"
+msgstr "平衡"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "SystemPageData"
+msgid "Performance"
+msgstr "性能"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "SystemPageData"
+msgid "Quiet"
+msgstr "省电"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "SystemPageData"
+msgid "LowPower"
+msgstr "低功耗"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "System Tuning"
+msgstr "系统调校"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Advanced"
+msgstr "高级"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Power Limits"
+msgstr "功率限制"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_warning"
+msgid "Power limits apply only while tuning is enabled"
+msgstr "启用调校后，功率限制才会生效"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_group_enabled"
+msgid "Enable Tuning"
+msgstr "启用调校"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "requires_fan_curve_warning"
+msgid ""
+"CPU power limits require an active custom fan curve. Enable a fan curve for "
+"the active profile in the Fans tab to unlock these controls."
+msgstr ""
+"CPU 功率限制需要一条处于活动状态的自定义风扇曲线。请在「风扇」标签页为当前配"
+"置文件启用风扇曲线，以解锁这些控制。"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_pl1_spl"
+msgid "CPU Sustained Power Limit"
+msgstr "CPU 持续功率限制"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_pl1_spl_help"
+msgid ""
+"Long-term CPU power limit that affects sustained workload performance. "
+"Higher values may increase heat and power consumption."
+msgstr "影响持续负载性能的长期 CPU 功率限制。数值越高，发热和功耗可能越大。"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_pl2_sppt"
+msgid "CPU Turbo Power Limit"
+msgstr "CPU 峰值功率限制"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_pl2_sppt_help"
+msgid ""
+"Short-term CPU power limit for boost periods. Controls maximum power during "
+"brief high-performance bursts."
+msgstr "高负载短时加速期间的 CPU 功率限制。控制瞬时高性能突发时的最大功耗。"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_pl3_fppt"
+msgid "CPU Fast Burst Power Limit"
+msgstr "CPU 快速突发功率限制"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_pl3_fppt_help"
+msgid ""
+"Ultra-short duration power limit for instantaneous CPU bursts. Affects "
+"responsiveness during sudden workload spikes."
+msgstr "用于瞬时 CPU 突发的超短时功率限制。影响突发负载尖峰时的响应速度。"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_fppt"
+msgid "Fast Package Power Limit"
+msgstr "快速封装功率限制"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_fppt_help"
+msgid ""
+"Ultra-short duration power limit for system package. Controls maximum power "
+"during millisecond-scale load spikes."
+msgstr "系统封装的超短时功率限制。控制毫秒级负载尖峰时的最大功耗。"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_apu_sppt"
+msgid "APU Sustained Power Limit"
+msgstr "APU 持续功率限制"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_apu_sppt_help"
+msgid ""
+"Long-term power limit for integrated graphics and CPU combined. Affects "
+"sustained performance of APU-based workloads."
+msgstr "核显与 CPU 合计的长期功率限制。影响 APU 工作的持续性能。"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_platform_sppt"
+msgid "Platform Sustained Power Limit"
+msgstr "平台持续功率限制"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "ppt_platform_sppt_help"
+msgid ""
+"Overall system power limit for sustained operations. Controls total platform "
+"power consumption over extended periods."
+msgstr "整机持续运行的功率限制。控制长时间运行下的总平台功耗。"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "nv_dynamic_boost"
+msgid "GPU Power Boost"
+msgstr "GPU 动态加速"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "nv_dynamic_boost_help"
+msgid ""
+"Additional power allocation for GPU dynamic boost. Higher values increase "
+"GPU performance but generate more heat."
+msgstr "为 GPU 动态加速额外分配的功耗。数值越高性能越强，但发热也越大。"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "nv_tgp"
+msgid "GPU TGP"
+msgstr "GPU 总图形功耗"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "nv_tgp_help"
+msgid ""
+"Total graphics power limit for the dedicated NVIDIA GPU. Higher values can "
+"improve performance at the cost of additional heat and power draw."
+msgstr "NVIDIA 独显的总图形功耗限制。数值越高性能越好，但发热和功耗也越大。"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "nv_temp_target"
+msgid "GPU Temperature Limit"
+msgstr "GPU 温度上限"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "nv_temp_target_help"
+msgid ""
+"Maximum GPU temperature threshold in Celsius. GPU will throttle to maintain "
+"temperature below this limit."
+msgstr "GPU 最高温度阈值（摄氏度）。GPU 将自动降频以使温度维持在此限值以下。"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Device"
+msgstr "设备"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "no_asus_armoury_driver_1"
+msgid "The asus-armoury driver is not loaded"
+msgstr "未加载 asus-armoury 驱动"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "no_asus_armoury_driver_2"
+msgid "For advanced features you will require a kernel with this driver added."
+msgstr "需要内置此驱动的内核才能使用高级功能。"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Panel Overdrive"
+msgstr "面板过驱动"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "POST boot sound"
+msgstr "开机自检音效"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Screen Auto Brightness"
+msgstr "屏幕自动亮度"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "MCU Powersave"
+msgstr "MCU 省电"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Local Dimming"
+msgstr "局部调光"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Screenpad"
+msgstr "Screenpad"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Screenpad brightness"
+msgstr "Screenpad 亮度"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Sync with primary"
+msgstr "与主屏同步"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Energy Performance Preference"
+msgstr "能效偏好（EPP）"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Change EPP based on Throttle Policy"
+msgstr "根据电源策略更改 EPP"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "EPP for Balanced Policy"
+msgstr "均衡策略的 EPP"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "EPP for Performance Policy"
+msgstr "性能策略的 EPP"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "EPP for Quiet Policy"
+msgstr "省电策略的 EPP"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Throttle Policy for power state"
+msgstr "按电源状态的策略"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Throttle Policy on Battery"
+msgstr "电池模式策略"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Change policy when switching to battery"
+msgstr "切换到电池时更改策略"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Throttle Policy on AC"
+msgstr "交流电源策略"
+
+#: rog-control-center/ui/pages/system.slint
+msgctxt "PageSystem"
+msgid "Change policy when switching to AC"
+msgstr "切换到交流电时更改策略"
+
+#: rog-control-center/ui/widgets/rog.slint
+msgctxt "not_supported_short"
+msgid "N/A"
+msgstr "不支持"
+
+#: rog-control-center/ui/widgets/rog.slint
+msgctxt "confirm_reset"
+msgid "Are you sure you want to reset this?"
+msgstr "确定要重置此项吗？"
+
+#: rog-control-center/ui/widgets/rog.slint
+msgctxt "RogPowerSlider"
+msgid "OK"
+msgstr "确定"
+
+#: rog-control-center/ui/widgets/rog.slint
+msgctxt "RogPowerSlider"
+msgid "Cancel"
+msgstr "取消"
+
+#: rog-control-center/ui/widgets/rog.slint
+msgctxt "RogPowerSlider"
+msgid "Reset"
+msgstr "重置"
+
+#: rog-control-center/ui/pages/anime.slint:6
+msgctxt "Anime Brightness"
+msgid "Off"
+msgstr "关"
+
+#: rog-control-center/ui/pages/aura.slint:29
+msgctxt "PageAura"
+msgid "Brightness"
+msgstr "亮度"
+
+#: rog-control-center/ui/pages/slash.slint:51
+msgctxt "PageSlash"
+msgid "Slash lighting"
+msgstr ""
+
+#: rog-control-center/ui/pages/slash.slint:56
+msgctxt "PageSlash"
+msgid "Enable A-cover lighting"
+msgstr ""
+
+#: rog-control-center/ui/pages/slash.slint:77
+#, fuzzy
+msgctxt "PageSlash"
+msgid "Animation speed"
+msgstr "开机"
+
+#: rog-control-center/ui/pages/slash.slint:90
+#, fuzzy
+msgctxt "PageSlash"
+msgid "Animation"
+msgstr "开机"
+
+#: rog-control-center/ui/pages/slash.slint:110
+msgctxt "PageSlash"
+msgid "Visibility triggers"
+msgstr ""
+
+#: rog-control-center/ui/pages/slash.slint:170
+msgctxt "Slash_tip"
+msgid ""
+"Slash Lighting controls the A-cover LED strip found on supported Zephyrus "
+"models."
+msgstr "Slash 灯效控制支持的 Zephyrus 机型上的 A 面 LED 灯带。"
+
+#: rog-control-center/ui/pages/battery.slint:29
+#, fuzzy
+msgctxt "PageBattery"
+msgid "Charge limit"
+msgstr "充电限制"
+
+#: rog-control-center/ui/pages/battery.slint:54
+msgctxt "PageBattery"
+msgid "Battery Health (Capacity):"
+msgstr "电池健康度 (容量):"
+
+#: rog-control-center/ui/pages/battery.slint:67
+#, fuzzy
+msgctxt "PageBattery"
+msgid "Status:"
+msgstr "状态:"
+
+#: rog-control-center/ui/pages/battery.slint:80
+#, fuzzy
+msgctxt "PageBattery"
+msgid "Power Draw:"
+msgstr "功耗:"
+
+#: rog-control-center/ui/pages/battery.slint:93
+msgctxt "PageBattery"
+msgid "Time to Full:"
+msgstr "充满所需时间:"
+
+#: rog-control-center/ui/pages/battery.slint:93
+msgctxt "PageBattery"
+msgid "Time Remaining:"
+msgstr "剩余时间:"
+
+#. 3-state set per device; the index is the value written over dbus.
+#: rog-control-center/ui/pages/system.slint:63
+#, fuzzy
+msgctxt "SystemPageData"
+msgid "Off"
+msgstr "关"
+
+#. 3-state set per device; the index is the value written over dbus.
+#: rog-control-center/ui/pages/system.slint:63
+msgctxt "SystemPageData"
+msgid "Multi-zone"
+msgstr "多分区"
+
+#. 3-state set per device; the index is the value written over dbus.
+#: rog-control-center/ui/pages/system.slint:63
+msgctxt "SystemPageData"
+msgid "Multi-zone Strong"
+msgstr "强效多分区"
+
+#: rog-control-center/ui/pages/system.slint:207
+#, fuzzy
+msgctxt "PageSystem"
+msgid "Power settings"
+msgstr "电源设置"
+
+#: rog-control-center/ui/pages/system.slint:229
+msgctxt "PageSystem"
+msgid "Hardware Monitor"
+msgstr "硬件监控"
+
+#: rog-control-center/ui/pages/system.slint:242
+msgctxt "PageSystem"
+msgid "CPU Status"
+msgstr "CPU 状态"
+
+#: rog-control-center/ui/pages/system.slint:251
+#, fuzzy
+msgctxt "PageSystem"
+msgid "Temperature:"
+msgstr "温度:"
+
+#: rog-control-center/ui/pages/system.slint:264
+msgctxt "PageSystem"
+msgid "Usage:"
+msgstr "使用率:"
+
+#: rog-control-center/ui/pages/system.slint:277
+msgctxt "PageSystem"
+msgid "Frequency:"
+msgstr "频率:"
+
+#: rog-control-center/ui/pages/system.slint:296
+msgctxt "PageSystem"
+msgid "iGPU Status"
+msgstr "iGPU 状态"
+
+#: rog-control-center/ui/pages/system.slint:290
+msgctxt "PageSystem"
+msgid "Memory Status"
+msgstr "内存状态"
+
+#: rog-control-center/ui/pages/system.slint:299
+msgctxt "PageSystem"
+msgid "RAM Usage:"
+msgstr "内存使用率:"
+
+#: rog-control-center/ui/pages/system.slint:359
+msgctxt "PageSystem"
+msgid "dGPU Status"
+msgstr "dGPU 状态"
+
+#: rog-control-center/ui/pages/system.slint:316
+msgctxt "PageSystem"
+msgid "GPU Status"
+msgstr "GPU 状态"
+
+#: rog-control-center/ui/pages/system.slint:329
+msgctxt "PageSystem"
+msgid "N/A"
+msgstr "无"
+
+#: rog-control-center/ui/pages/system.slint:351
+#, fuzzy
+msgctxt "PageSystem"
+msgid "Fan Speeds"
+msgstr "风扇速度"
+
+#: rog-control-center/ui/pages/system.slint:360
+msgctxt "PageSystem"
+msgid "CPU Fan:"
+msgstr "CPU 风扇:"
+
+#: rog-control-center/ui/pages/system.slint:373
+msgctxt "PageSystem"
+msgid "GPU Fan:"
+msgstr "GPU 风扇:"
+
+#: rog-control-center/ui/pages/system.slint:386
+msgctxt "PageSystem"
+msgid "Mid Fan:"
+msgstr "中间风扇:"
+
+#: rog-control-center/ui/pages/system.slint:403
+msgctxt "PageSystem"
+msgid "Platform Profile"
+msgstr ""
+
+#: rog-control-center/ui/pages/system.slint:477
+#, fuzzy
+msgctxt "PageSystem"
+msgid "Armoury settings"
+msgstr "电源设置"
+
+#: rog-control-center/ui/pages/system.slint:539
+msgctxt "PageSystem"
+msgid "MiniLED Mode"
+msgstr "MiniLED 模式"
+
+#: rog-control-center/ui/pages/system.slint:557
+msgctxt "ppt_warning"
+msgid "The following settings are not applied until the toggle is enabled."
+msgstr ""
+
+#: rog-control-center/ui/pages/system.slint:794
+msgctxt "PageSystem"
+msgid "Energy Performance Preference linked to Throttle Policy"
+msgstr "绑定至电源管理方案的 EPP"
+
+#: rog-control-center/ui/pages/system.slint:826
+msgctxt "PageSystem"
+msgid "EPP for "
+msgstr "EPP 适用于 "
+
+#: rog-control-center/ui/pages/system.slint:826
+#, fuzzy
+msgctxt "PageSystem"
+msgid " Policy"
+msgstr " 策略"
+
+#: rog-control-center/ui/pages/system.slint:861
+msgctxt "PageSystem"
+msgid "Enabled"
+msgstr "启用"
+
+#: rog-control-center/ui/pages/about.slint:27
+msgctxt "PageAbout"
+msgid ""
+"\n"
+"A powerful graphical interface for managing ASUS ROG, TUF, and ProArt "
+"laptops on Linux. It acts as the official GUI for the asusctl toolset, "
+"allowing for seamless hardware tuning without the command line."
+msgstr ""
+"\n"
+"一个在 Linux 上管理华硕 ROG、TUF 和 ProArt 笔记本电脑的强大图形界面。它作为 "
+"asusctl 工具集的官方 GUI，实现无需命令行即可无缝调节硬件。"
+
+#: rog-control-center/ui/pages/about.slint:32
+msgctxt "PageAbout"
+msgid "Key Features:"
+msgstr "主要特性:"
+
+#: rog-control-center/ui/pages/about.slint:36
+msgctxt "PageAbout"
+msgid ""
+"      • Performance: Switch power profiles and customize fan curves.\n"
+"      • Aura Sync: Control keyboard backlighting and LED effects.\n"
+"      • Battery Health: Set charge limits to extend battery longevity.\n"
+"      • Display: Toggle Panel Overdrive and refresh rates.\n"
+"      • AniMe Matrix: Control AniMe Matrix displays."
+msgstr ""
+"      • 性能：切换电源配置文件并自定义风扇曲线。\n"
+"      • Aura Sync：控制键盘背光和 LED 效果。\n"
+"      • 电池健康：设置充电限制以延长电池寿命。\n"
+"      • 显示：切换面板超频（Panel Overdrive）和刷新率。\n"
+"      • AniMe Matrix：控制 AniMe Matrix 屏幕。"
+
+#: rog-control-center/ui/pages/about.slint:41
+msgctxt "PageAbout"
+msgid "Requirements:"
+msgstr "运行要求:"
+
+#: rog-control-center/ui/pages/about.slint:46
+msgctxt "PageAbout"
+msgid ""
+"      This software requires kernel version 6.19 or later. However due to "
+"active development, the latest kernel is always the recommended one."
+msgstr ""
+"      此软件需要 6.19 或更高版本的内核。但由于处于活跃开发中，推荐始终使用最"
+"新版内核。"
+
+#: rog-control-center/ui/pages/about.slint:51
+msgctxt "PageAbout"
+msgid "Work in progress:"
+msgstr "正在开发中:"
+
+#: rog-control-center/ui/pages/about.slint:55
+msgctxt "PageAbout"
+msgid ""
+"      • Theme the widgets\n"
+"      • Add a cpu/gpu temp/fan speed info bar\n"
+"      • Include fan speeds, temps in a bottom bar\n"
+"      • Screenpad controls\n"
+"      • ROG Ally specific settings"
+msgstr ""
+"      • 适配小部件主题\n"
+"      • 添加 CPU/GPU 温度及风扇转速信息栏\n"
+"      • 在底栏展示风扇转速及温度\n"
+"      • Screenpad 屏幕键盘控制\n"
+"      • ROG Ally 特性设置"
+
+#: rog-control-center/ui/pages/about.slint:60
+msgctxt "PageAbout"
+msgid "License:"
+msgstr "开源协议:"
+
+#: rog-control-center/ui/pages/about.slint:64
+msgctxt "PageAbout"
+msgid ""
+"      This project is open-source software licensed under the Mozilla Public "
+"License 2.0 (MPL-2.0)."
+msgstr ""
+"      此项目为开源软件，采用 Mozilla Public License 2.0 (MPL-2.0) 授权协议。"
+
+#: rog-control-center/ui/pages/about.slint:69
+msgctxt "PageAbout"
+msgid "Links:"
+msgstr "相关链接:"
+
+#: rog-control-center/ui/pages/about.slint:73
+msgctxt "PageAbout"
+msgid ""
+"      Source Code: https://github.com/OpenGamingCollective/asusctl\n"
+"      Website: https://asus-linux.org/"
+msgstr ""
+"      源代码: https://github.com/OpenGamingCollective/asusctl\n"
+"      官方网站: https://asus-linux.org/"
+
+#: rog-control-center/ui/pages/gpu.slint:29
+msgctxt "PageGPU"
+msgid "Integrated"
+msgstr "集成显卡"
+
+#: rog-control-center/ui/pages/gpu.slint:29
+msgctxt "PageGPU"
+msgid "Hybrid"
+msgstr "混合显卡"
+
+#: rog-control-center/ui/pages/gpu.slint:29
+msgctxt "PageGPU"
+msgid "Ultimate"
+msgstr "独显直连"
+
+#: rog-control-center/ui/pages/gpu.slint:48
+msgctxt "PageGPU"
+msgid "Internal/Discrete GPU"
+msgstr "内置/独显 GPU"
+
+#: rog-control-center/ui/pages/gpu.slint:69
+msgctxt "PageGPU"
+msgid ""
+"Note: Changes take effect after a reboot. The dropdown always shows the "
+"current mode."
+msgstr "注意：修改将在重启后生效。下拉菜单始终显示当前模式。"
+
+#: rog-control-center/ui/pages/gpu.slint:76
+msgctxt "PageGPU"
+msgid "GPU mode"
+msgstr "GPU 模式"
+
+#: rog-control-center/ui/pages/gpu.slint:104
+msgctxt "PageGPU"
+msgid "Reserved GPU memory"
+msgstr "保留的 GPU 显存"
+
+#: rog-control-center/ui/types/aura_types.slint:60
+msgctxt "Aura power zone"
+msgid "Ally"
+msgstr ""
+
+#: rog-control-center/ui/types/aura_types.slint:70
+msgctxt "Aura brightness"
+msgid "Off"
+msgstr "关"
+
+#: rog-control-center/ui/types/aura_types.slint:71
+msgctxt "Aura brightness"
+msgid "Low"
+msgstr "暗"
+
+#: rog-control-center/ui/types/aura_types.slint:72
+msgctxt "Aura brightness"
+msgid "Med"
+msgstr "中"
+
+#: rog-control-center/ui/types/aura_types.slint:73
+msgctxt "Aura brightness"
+msgid "High"
+msgstr "亮"
+
+#: rog-control-center/ui/types/aura_types.slint:78
+#, fuzzy
+msgctxt "Basic aura mode"
+msgid "Static"
+msgstr "恒亮"
+
+#: rog-control-center/ui/types/aura_types.slint:101
+msgctxt "Aura zone"
+msgid "Logo"
+msgstr "徽标"
+
+#: rog-control-center/ui/types/aura_types.slint:112
+msgctxt "Aura speed"
+msgid "Low"
+msgstr "慢"
+
+#: rog-control-center/ui/types/aura_types.slint:114
+msgctxt "Aura speed"
+msgid "High"
+msgstr "快"
+
+#: rog-control-center/ui/widgets/aura_power.slint:32
+msgctxt "AuraPowerGroup"
+msgid "Boot"
+msgstr "开机"
+
+#: rog-control-center/ui/widgets/aura_power.slint:112
+msgctxt "AuraPowerGroupOld"
+msgid "Boot"
+msgstr "开机"
+
+#: rog-control-center/ui/widgets/aura_power.slint:122
+msgctxt "AuraPowerGroupOld"
+msgid "Awake"
+msgstr "唤醒"
+
+#: rog-control-center/ui/widgets/aura_power.slint:132
+msgctxt "AuraPowerGroupOld"
+msgid "Sleep"
+msgstr "睡眠"
+
+#: rog-control-center/ui/main_window.slint:83
+msgctxt "Menu4"
+msgid "Slash Lighting"
+msgstr "Slash 灯带"
+
+#: rog-control-center/ui/main_window.slint:84
+#, fuzzy
+msgctxt "Menu5"
+msgid "Fan Curves"
+msgstr "风扇曲线"
+
+#: rog-control-center/ui/main_window.slint:85
+msgctxt "Menu6"
+msgid "GPU Configuration"
+msgstr "GPU 配置"
+
+#: rog-control-center/ui/main_window.slint:86
+msgctxt "Menu9"
+msgid "Battery Info"
+msgstr "电池信息"
+
+#: rog-control-center/ui/main_window.slint:87
+#, fuzzy
+msgctxt "Menu7"
+msgid "App Settings"
+msgstr "应用设置"
+
+#: rog-control-center/ui/main_window.slint:88
+#, fuzzy
+msgctxt "Menu8"
+msgid "About"
+msgstr "关于"
+
+#~ msgctxt "PageAppSettings"
+#~ msgid "Auto-switch refresh rate on battery"
+#~ msgstr "使用电池时自动切换刷新率"
+
+#, fuzzy
+#~ msgctxt "PageSystem"
+#~ msgid "Display Settings"
+#~ msgstr "显示设置"
+
+#~ msgctxt "PageSystem"
+#~ msgid "Refresh Rate:"
+#~ msgstr "刷新率:"
+
+#~ msgctxt "PageSystem"
+#~ msgid "Base system settings"
+#~ msgstr "基本设置"
+
+#~ msgctxt "PageSystem"
+#~ msgid "System performance settings"
+#~ msgstr "性能设置"
+
+#~ msgctxt "MainWindow"
+#~ msgid "ROG"
+#~ msgstr "ROG"
+
+msgid "Sleeping"
+msgstr "睡眠中"
